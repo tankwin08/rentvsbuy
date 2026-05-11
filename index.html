@@ -208,24 +208,24 @@
                 <input type="range" id="homePrice" min="100000" max="1500000" step="5000" value="430000">
             </div>
             <div class="slider-group">
-                <label>Monthly rent (comparable) <span id="rentVal" class="value-display">$2,100</span></label>
-                <input type="range" id="rent" min="500" max="8000" step="50" value="2100">
+                <label>Monthly rent (comparable) <span id="rentVal" class="value-display">$2,300</span></label>
+                <input type="range" id="rent" min="500" max="8000" step="50" value="2300">
             </div>
             <div class="slider-group">
                 <label>Down payment (%) <span id="downPercentVal" class="value-display">20%</span></label>
                 <input type="range" id="downPercent" min="3" max="50" step="1" value="20">
             </div>
             <div class="slider-group">
-                <label>Mortgage rate (%) <span id="rateVal" class="value-display">6.5%</span></label>
-                <input type="range" id="rate" min="2" max="12" step="0.1" value="6.5">
+                <label>Mortgage rate (%) <span id="rateVal" class="value-display">5.0%</span></label>
+                <input type="range" id="rate" min="2" max="12" step="0.1" value="5.0">
             </div>
             <div class="slider-group">
-                <label>Property tax rate (%) <span id="taxVal" class="value-display">1.1%</span></label>
+                <label>Property tax rate (%) <span id="taxVal" class="value-display">1.10%</span></label>
                 <input type="range" id="taxRate" min="0.2" max="3.5" step="0.05" value="1.1">
             </div>
             <div class="slider-group">
-                <label>Annual insurance ($) <span id="insVal" class="value-display">$1,720</span></label>
-                <input type="range" id="insurance" min="300" max="6000" step="50" value="1720">
+                <label>Annual insurance ($) <span id="insVal" class="value-display">$1,700</span></label>
+                <input type="range" id="insurance" min="300" max="6000" step="50" value="1700">
             </div>
             <div class="slider-group">
                 <label>Maintenance (% of home value / year) <span id="maintPercentVal" class="value-display">1.5%</span></label>
@@ -279,9 +279,9 @@
         <div class="card results-card">
             <h3>📊 Your Results</h3>
             <div class="result-grid">
-                <div class="result-item"><div class="result-label">Monthly owner cost (unrecoverable)</div><div class="result-number" id="monthlyOwnCost">$3,170</div></div>
-                <div class="result-item"><div class="result-label">Monthly rent</div><div class="result-number" id="monthlyRentShow">$2,100</div></div>
-                <div class="result-item"><div class="result-label">Owner premium (own - rent)</div><div class="result-number" id="premiumDiff">+$1,070</div></div>
+                <div class="result-item"><div class="result-label">Monthly owner cost (unrecoverable)</div><div class="result-number" id="monthlyOwnCost">$2,507</div></div>
+                <div class="result-item"><div class="result-label">Monthly rent</div><div class="result-number" id="monthlyRentShow">$2,300</div></div>
+                <div class="result-item"><div class="result-label">Owner premium (own - rent)</div><div class="result-number" id="premiumDiff">+$207</div></div>
                 <div class="result-item"><div class="result-label">Lifestyle benefit (monthly)</div><div class="result-number" id="lifestyleBenefitMonthly">$0</div></div>
             </div>
             <div class="result-grid">
@@ -309,7 +309,7 @@
             </div>
             <div class="result-item" style="margin-bottom: 1rem;">
                 <div class="result-label">Monthly DCA amount (savings from renting)</div>
-                <div class="result-number" id="monthlyDCA">$1,070</div>
+                <div class="result-number" id="monthlyDCA">$207</div>
                 <div class="note">Invested when owner cost > rent (renter saves the difference)</div>
             </div>
             <div class="result-grid">
@@ -322,20 +322,20 @@
             <hr>
             <h3 style="font-size:1.1rem;">🏡 Home value at that time (nominal vs real)</h3>
             <div class="result-grid">
-                <div class="result-item"><div class="result-label">Home equity (down payment + principal paid)</div><div class="result-number" id="homeEquity">$0</div></div>
+                <div class="result-item"><div class="result-label">Home equity (down payment + principal paid)</div><div class="result-number" id="homeEquity">$86,000 + principal</div></div>
                 <div class="result-item"><div class="result-label">Nominal home value</div><div class="result-number" id="homeValueNominal">$0</div></div>
                 <div class="result-item"><div class="result-label">Real home value (inflation‑adj.)</div><div class="result-number" id="homeValueReal">$0</div></div>
             </div>
-            <div class="note">Home equity = down payment + principal paid (not including appreciation). Home value includes appreciation. Real values adjusted by inflation.</div>
+            <div class="note">Home equity excludes remaining mortgage. Nominal home value includes appreciation. Real values adjusted by inflation.</div>
         </div>
     </div>
     <footer>moatmain.com — Mental models for life. All calculations include inflation adjustments for real values.</footer>
 </div>
 
 <script>
-    // City preset data
+    // City preset data (updated to match your screenshot: rent 2300, insurance 1700, etc.)
     const cityData = {
-        national: { price: 430000, rent: 2100, tax: 1.10, insurance: 1720, maint: 1.5 },
+        national: { price: 430000, rent: 2300, tax: 1.10, insurance: 1700, maint: 1.5 },
         nyc: { price: 750000, rent: 4200, tax: 1.75, insurance: 1800, maint: 1.5 },
         la: { price: 880000, rent: 3800, tax: 1.20, insurance: 2000, maint: 1.5 },
         chi: { price: 350000, rent: 2000, tax: 2.10, insurance: 1500, maint: 1.6 },
@@ -418,9 +418,6 @@
         let diyPct = parseFloat(diySlider.value) / 100;
         let inflation = parseFloat(inflationSlider.value) / 100;
 
-        // Real appreciation (for break-even & real home value)
-        let appreciationReal = (1 + appreciationNom) / (1 + inflation) - 1;
-
         // Monthly costs
         let downAmount = P * downPct;
         let loanAmount = P - downAmount;
@@ -431,14 +428,14 @@
         let monthlyMaintenanceDIY = rawMonthlyMaintenance * (1 - diyPct);
         let monthlyUnrecoverable = monthlyInterest + monthlyTax + monthlyInsurance + monthlyMaintenanceDIY;
         let monthlyLifestyleBenefit = P * lifestylePct / 12;
-        let effectiveMonthlyOwnCost = monthlyUnrecoverable - monthlyLifestyleBenefit; // Owner's true monthly outflow
+        let effectiveMonthlyOwnCost = monthlyUnrecoverable - monthlyLifestyleBenefit;
         let monthlyDifference = effectiveMonthlyOwnCost - rentMonthly; // positive -> owning more expensive
 
         let closingCosts = P * closingPct;
         let sellingCosts = P * sellPct;
         let totalTransaction = closingCosts + sellingCosts;
 
-        // Break-even using REAL appreciation (inflation-adjusted)
+        // BREAK-EVEN USING NOMINAL APPRECIATION (fixed!)
         let breakEvenYearsDecimal = 999;
         if (monthlyDifference <= 0) {
             breakEvenYearsDecimal = 0;
@@ -446,9 +443,9 @@
             let found = false;
             for (let months = 1; months <= 50*12; months++) {
                 let n = months / 12;
-                let equityGainReal = P * (Math.pow(1 + appreciationReal, n) - 1);
-                let totalCostReal = totalTransaction + monthlyDifference * 12 * n;
-                if (equityGainReal >= totalCostReal) {
+                let equityGainNom = P * (Math.pow(1 + appreciationNom, n) - 1);
+                let totalCostNom = totalTransaction + monthlyDifference * 12 * n;
+                if (equityGainNom >= totalCostNom) {
                     breakEvenYearsDecimal = n;
                     found = true;
                     break;
@@ -517,28 +514,25 @@
             fvDCANom = monthlySavings * monthsTotal;
         }
         let totalPortfolioNom = fvLumpNom + fvDCANom;
-        // Total nominal contributions (for info)
         let totalContributions = lumpSumInvest + monthlySavings * monthsTotal;
         document.getElementById('investLumpSum').innerHTML = '$' + lumpSumInvest.toLocaleString();
         document.getElementById('totalContributions').innerHTML = '$' + totalContributions.toLocaleString();
         document.getElementById('futurePortfolioNominal').innerHTML = '$' + totalPortfolioNom.toLocaleString(undefined, {maximumFractionDigits: 0});
 
         // Real (inflation-adjusted) portfolio value
-        let inflationMonthly = Math.pow(1 + inflation, 1/12) - 1;
         let realPortfolio = totalPortfolioNom / Math.pow(1 + inflation, compareYears);
         document.getElementById('futurePortfolioReal').innerHTML = '$' + realPortfolio.toLocaleString(undefined, {maximumFractionDigits: 0});
 
-        // Home value at comparison year
+        // Home value at comparison year (nominal and real)
         let homeValueNom = P * Math.pow(1 + appreciationNom, compareYears);
-        let homeValueReal = P * Math.pow(1 + appreciationReal, compareYears);
-        // Home equity (down payment + principal paid) - simplified: principal paid = loan amount * (1 - (1+rate/12)^(-remaining months)? No, we'll approximate: cumulative principal paid after N years = loan amount * ( ( (1+rate/12)^(12N) - 1 ) / ( (1+rate/12)^(360) - 1 ) )? Too complex. For simplicity, show home value (nominal and real) only, and note that equity is less due to remaining mortgage. But user asked for "real value number for the house". I'll show nominal and real home value. Add a note.
+        let realAppreciation = (1 + appreciationNom) / (1 + inflation) - 1;
+        let homeValueReal = P * Math.pow(1 + realAppreciation, compareYears);
         document.getElementById('homeValueNominal').innerHTML = '$' + homeValueNom.toLocaleString(undefined, {maximumFractionDigits: 0});
         document.getElementById('homeValueReal').innerHTML = '$' + homeValueReal.toLocaleString(undefined, {maximumFractionDigits: 0});
-        // Simple equity estimate: down payment + (loan amount * (1 - (1+rate/12)^(-(360-12*compareYears))/(1-(1+rate/12)^(-360)))? Too heavy. Instead show home value only.
-        document.getElementById('homeEquity').innerHTML = '$' + downAmount.toLocaleString() + ' + principal (see note)';
+        document.getElementById('homeEquity').innerHTML = '$' + downAmount.toLocaleString() + ' + principal';
     }
 
-    // Bind sliders
+    // Bind all sliders
     const sliders = ['homePrice', 'rent', 'downPercent', 'rate', 'taxRate', 'insurance', 'maintPercent', 'closingPercent', 'sellPercent', 'appreciation', 'lifestyle', 'diy', 'inflation', 'spyReturn', 'compareYears'];
     sliders.forEach(id => {
         document.getElementById(id).addEventListener('input', updateUI);
@@ -547,8 +541,6 @@
 
     updateUI();
     syncCompareYearsToBreakEven();
-    // Auto-sync compare years to break-even after every update? Uncomment if desired
-    // For now, manual button only.
 </script>
 </body>
 </html>
