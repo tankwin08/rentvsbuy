@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Moat & Main — Rent vs Buy Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #0b1a2f;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            margin: 0;
+            padding: 24px 16px;
+            color: #eef2ff;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #0f212e;
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.4);
+            border: 1px solid #2d4a6e;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f5e7a3, #d4af37);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #8aaec0;
+            margin-bottom: 1.8rem;
+            font-size: 0.9rem;
+            border-left: 3px solid #d4af37;
+            padding-left: 0.75rem;
+        }
+        .card {
+            background: #0a1a24;
+            border-radius: 1.25rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #2c4b64;
+        }
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: #f5e7a3;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .slider-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        input {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #d4af37;
+        }
+        .value-display {
+            font-family: monospace;
+            background: #07121b;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .output-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .output-card {
+            background: #07121b;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            text-align: center;
+        }
+        .output-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8aaec0;
+        }
+        .output-number {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #f5e7a3;
+            line-height: 1.2;
+        }
+        .verdict {
+            background: #1a2f3c;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        hr {
+            border-color: #2c4b64;
+            margin: 1rem 0;
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #5f7e99;
+        }
+        @media (max-width: 550px) {
+            .output-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏡 RENT vs BUY</h1>
+    <div class="sub">Moat & Main — hedge fund thinking for your daily life</div>
+
+    <div class="card">
+        <h3>🏠 Property & Market</h3>
+        <div class="slider-group">
+            <label>Home price <span id="homePriceVal" class="value-display">$430,000</span></label>
+            <input type="range" id="homePrice" min="100000" max="1500000" step="5000" value="430000">
+        </div>
+        <div class="slider-group">
+            <label>Monthly rent (comparable home) <span id="rentVal" class="value-display">$2,100</span></label>
+            <input type="range" id="rent" min="500" max="8000" step="50" value="2100">
+        </div>
+        <div class="slider-group">
+            <label>Down payment (%) <span id="downPercentVal" class="value-display">10%</span></label>
+            <input type="range" id="downPercent" min="3" max="50" step="1" value="10">
+        </div>
+        <div class="slider-group">
+            <label>Mortgage rate (%) <span id="rateVal" class="value-display">6.5%</span></label>
+            <input type="range" id="rate" min="2" max="12" step="0.1" value="6.5">
+        </div>
+        <div class="slider-group">
+            <label>Property tax rate (%) <span id="taxVal" class="value-display">1.1%</span></label>
+            <input type="range" id="taxRate" min="0.2" max="3.5" step="0.05" value="1.1">
+        </div>
+        <div class="slider-group">
+            <label>Annual insurance ($) <span id="insVal" class="value-display">$1,720</span></label>
+            <input type="range" id="insurance" min="300" max="6000" step="50" value="1720">
+        </div>
+        <div class="slider-group">
+            <label>Maintenance (% of home value / year) <span id="maintPercentVal" class="value-display">1.5%</span></label>
+            <input type="range" id="maintPercent" min="0.5" max="4" step="0.1" value="1.5">
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>💰 One‑time & Transaction Costs</h3>
+        <div class="slider-group">
+            <label>Closing costs (buy) % <span id="closingPercentVal" class="value-display">3%</span></label>
+            <input type="range" id="closingPercent" min="1" max="8" step="0.5" value="3">
+        </div>
+        <div class="slider-group">
+            <label>Selling commission % <span id="sellPercentVal" class="value-display">5.8%</span></label>
+            <input type="range" id="sellPercent" min="3" max="10" step="0.2" value="5.8">
+        </div>
+        <div class="slider-group">
+            <label>Expected home appreciation (% per year) <span id="apprVal" class="value-display">3%</span></label>
+            <input type="range" id="appreciation" min="0" max="8" step="0.25" value="3">
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>❤️ Lifestyle & Handiness (Your unique values)</h3>
+        <div class="slider-group">
+            <label>🏠 Lifestyle benefit (belonging, emotional) – % of home value per year <span id="lifestyleVal" class="value-display">0%</span></label>
+            <input type="range" id="lifestyle" min="0" max="5" step="0.1" value="0">
+            <div style="font-size:0.7rem; color:#8aaec0;">How much is the sense of home worth to you? (0–5%)</div>
+        </div>
+        <div class="slider-group">
+            <label>🛠️ DIY Handiness – maintenance savings (% of normal maintenance) <span id="diyVal" class="value-display">0%</span></label>
+            <input type="range" id="diy" min="0" max="100" step="5" value="0">
+            <div style="font-size:0.7rem; color:#8aaec0;">0% = pay full maintenance; 100% = you do everything, no labor cost</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Your Results</h3>
+        <div class="output-grid">
+            <div class="output-card">
+                <div class="output-label">Monthly unrecoverable cost (owning)</div>
+                <div class="output-number" id="monthlyOwnCost">$3,170</div>
+                <div style="font-size:0.7rem;">interest + tax + ins + (maint after DIY)</div>
+            </div>
+            <div class="output-card">
+                <div class="output-label">Monthly rent</div>
+                <div class="output-number" id="monthlyRentShow">$2,100</div>
+            </div>
+            <div class="output-card">
+                <div class="output-label">Owner premium (own cost - rent)</div>
+                <div class="output-number" id="premiumDiff">+$1,070</div>
+            </div>
+            <div class="output-card">
+                <div class="output-label">Lifestyle benefit (monthly)</div>
+                <div class="output-number" id="lifestyleBenefitMonthly">$0</div>
+            </div>
+        </div>
+        <div class="output-grid">
+            <div class="output-card">
+                <div class="output-label">Total transaction frictions</div>
+                <div class="output-number" id="transactionFriction">$37,840</div>
+                <div style="font-size:0.7rem;">closing + selling commission</div>
+            </div>
+            <div class="output-card">
+                <div class="output-label">Break‑even year</div>
+                <div class="output-number" id="breakEvenYear">7.2 years</div>
+                <div style="font-size:0.7rem;">including lifestyle benefit & DIY</div>
+            </div>
+        </div>
+        <div class="verdict" id="verdict">
+            📌 Renting is cheaper in the short term
+        </div>
+        <p style="font-size:0.7rem; margin-top:0.8rem; text-align:center;">*Break‑even year assumes net monthly gap after lifestyle benefit & DIY, plus transaction costs. If you stay longer than that, buying (including lifestyle) catches up.</p>
+    </div>
+    <footer>
+        moatmain.com — Mental models for life. All numbers illustrative. Use your own tax & legal advice.
+    </footer>
+</div>
+
+<script>
+    // Get elements
+    const homePriceSlider = document.getElementById('homePrice');
+    const rentSlider = document.getElementById('rent');
+    const downPercentSlider = document.getElementById('downPercent');
+    const rateSlider = document.getElementById('rate');
+    const taxRateSlider = document.getElementById('taxRate');
+    const insuranceSlider = document.getElementById('insurance');
+    const maintPercentSlider = document.getElementById('maintPercent');
+    const closingPercentSlider = document.getElementById('closingPercent');
+    const sellPercentSlider = document.getElementById('sellPercent');
+    const appreciationSlider = document.getElementById('appreciation');
+    const lifestyleSlider = document.getElementById('lifestyle');
+    const diySlider = document.getElementById('diy');
+
+    function updateUI() {
+        // read values
+        let P = parseFloat(homePriceSlider.value);
+        let rentMonthly = parseFloat(rentSlider.value);
+        let downPct = parseFloat(downPercentSlider.value) / 100;
+        let rateYear = parseFloat(rateSlider.value) / 100;
+        let taxRateYear = parseFloat(taxRateSlider.value) / 100;
+        let insuranceYear = parseFloat(insuranceSlider.value);
+        let maintPctYear = parseFloat(maintPercentSlider.value) / 100;
+        let closingPct = parseFloat(closingPercentSlider.value) / 100;
+        let sellPct = parseFloat(sellPercentSlider.value) / 100;
+        let appreciation = parseFloat(appreciationSlider.value) / 100;
+        let lifestylePct = parseFloat(lifestyleSlider.value) / 100;
+        let diyPct = parseFloat(diySlider.value) / 100;
+
+        // derived
+        let downAmount = P * downPct;
+        let loanAmount = P - downAmount;
+        let monthlyInterest = loanAmount * (rateYear / 12);
+        let monthlyTax = P * taxRateYear / 12;
+        let monthlyInsurance = insuranceYear / 12;
+        let rawMonthlyMaintenance = P * maintPctYear / 12;
+        let monthlyMaintenanceDIY = rawMonthlyMaintenance * (1 - diyPct);
+        let monthlyUnrecoverable = monthlyInterest + monthlyTax + monthlyInsurance + monthlyMaintenanceDIY;
+
+        let monthlyLifestyleBenefit = P * lifestylePct / 12;
+
+        // effective monthly cost of owning after lifestyle benefit (negative = benefit)
+        let effectiveMonthlyOwnCost = monthlyUnrecoverable - monthlyLifestyleBenefit;
+
+        let monthlyDifference = effectiveMonthlyOwnCost - rentMonthly; // positive means owning more expensive
+
+        // transaction frictions
+        let closingCosts = P * closingPct;
+        let sellingCosts = P * sellPct;
+        let totalTransaction = closingCosts + sellingCosts;
+
+        // break‑even year: we need to find n such that totalTransaction + sum_{t=1 to n} (monthlyDifference * 12) = 0, but with appreciation added to equity.
+        // Simplified: equity gain from appreciation = P * ( (1+appreciation)^n - 1 ). Net cost saved = equity gain - totalTransaction - (monthlyDifference * 12 * n)
+        // Solve for net = 0 => P*((1+appr)^n -1) = totalTransaction + monthlyDifference*12*n
+        // This is transcendental, we approximate with loop (max 50 years)
+        let breakEven = 999;
+        if (monthlyDifference <= 0) {
+            breakEven = 0; // owning already cheaper per month
+        } else {
+            for (let n = 1; n <= 50; n++) {
+                let equityGain = P * (Math.pow(1 + appreciation, n) - 1);
+                let totalCost = totalTransaction + monthlyDifference * 12 * n;
+                if (equityGain >= totalCost) {
+                    breakEven = n;
+                    break;
+                }
+            }
+        }
+
+        // display formatted numbers
+        document.getElementById('homePriceVal').innerText = '$' + P.toLocaleString();
+        document.getElementById('rentVal').innerText = '$' + rentMonthly.toLocaleString();
+        document.getElementById('downPercentVal').innerText = (downPct*100).toFixed(0) + '%';
+        document.getElementById('rateVal').innerText = (rateYear*100).toFixed(1) + '%';
+        document.getElementById('taxVal').innerText = (taxRateYear*100).toFixed(2) + '%';
+        document.getElementById('insVal').innerText = '$' + insuranceYear.toLocaleString();
+        document.getElementById('maintPercentVal').innerText = (maintPctYear*100).toFixed(1) + '%';
+        document.getElementById('closingPercentVal').innerText = (closingPct*100).toFixed(1) + '%';
+        document.getElementById('sellPercentVal').innerText = (sellPct*100).toFixed(1) + '%';
+        document.getElementById('apprVal').innerText = (appreciation*100).toFixed(1) + '%';
+        document.getElementById('lifestyleVal').innerText = (lifestylePct*100).toFixed(1) + '%';
+        document.getElementById('diyVal').innerText = (diyPct*100).toFixed(0) + '%';
+
+        document.getElementById('monthlyOwnCost').innerHTML = '$' + monthlyUnrecoverable.toFixed(0);
+        document.getElementById('monthlyRentShow').innerHTML = '$' + rentMonthly.toFixed(0);
+        document.getElementById('premiumDiff').innerHTML = (effectiveMonthlyOwnCost - rentMonthly > 0 ? '+' : '') + '$' + (effectiveMonthlyOwnCost - rentMonthly).toFixed(0);
+        document.getElementById('lifestyleBenefitMonthly').innerHTML = '$' + monthlyLifestyleBenefit.toFixed(0);
+        document.getElementById('transactionFriction').innerHTML = '$' + totalTransaction.toLocaleString();
+        document.getElementById('breakEvenYear').innerHTML = (breakEven === 999 ? '>50 yrs' : breakEven.toFixed(1) + ' years');
+
+        let verdictDiv = document.getElementById('verdict');
+        if (breakEven === 0) {
+            verdictDiv.innerHTML = '✅ Owning is cheaper from month one (after lifestyle & DIY)';
+        } else if (breakEven < 5) {
+            verdictDiv.innerHTML = '🏡 Buy likely wins — break‑even in ' + breakEven.toFixed(1) + ' years';
+        } else if (breakEven <= 10) {
+            verdictDiv.innerHTML = '⚖️ Borderline — need ' + breakEven.toFixed(1) + ' years to break even';
+        } else {
+            verdictDiv.innerHTML = '🔁 Rent is better — break‑even > ' + (breakEven === 999 ? '50' : breakEven.toFixed(1)) + ' years';
+        }
+    }
+
+    function bindEvent() {
+        const sliders = ['homePrice', 'rent', 'downPercent', 'rate', 'taxRate', 'insurance', 'maintPercent', 'closingPercent', 'sellPercent', 'appreciation', 'lifestyle', 'diy'];
+        sliders.forEach(id => {
+            document.getElementById(id).addEventListener('input', updateUI);
+        });
+    }
+
+    bindEvent();
+    updateUI();
+</script>
+</body>
+</html>
