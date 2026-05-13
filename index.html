@@ -348,9 +348,9 @@
 
             <hr>
             <div class="break-even-box">
-                <div class="result-label">⏱️ Break‑even (nominal)</div>
+                <div class="result-label">⏱️ Break‑even (nominal) – when owner pulls ahead</div>
                 <div class="break-even-value" id="breakEvenExact">7 years 2 months</div>
-                <div class="note">After this year, owner's net equity (after selling costs) surpasses renter's portfolio (nominal).</div>
+                <div class="note">Calculated using the same inflation‑adjusted simulation as the comparison above. Owner's net equity (after selling costs) and renter's portfolio are compared year by year.</div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin: 0.8rem 0 0.5rem;">
@@ -368,7 +368,7 @@
             <div class="note">Monthly DCA varies each year because rent and owner costs increase with inflation. The renter invests the monthly difference (if positive) every month.</div>
         </div>
     </div>
-    <footer>moatmain.com — Mental models for life. All calculations include inflation‑adjusted DCA. Selling commission can be toggled in owner net equity.</footer>
+    <footer>moatmain.com — Mental models for life. Break‑even is computed with same detailed simulation as the comparison table.</footer>
 </div>
 
 <script>
@@ -408,8 +408,6 @@
     const includeSellingCheckbox = document.getElementById('includeSellingCostCheckbox');
     const netEquityLabel = document.getElementById('netEquityLabel');
 
-    let currentBreakEvenDecimal = 7.2;
-
     function getLoanTermMonths() {
         for (let radio of loanTermRadios) if (radio.checked) return parseInt(radio.value) * 12;
         return 180;
@@ -442,6 +440,7 @@
     }
 
     function syncCompareYearsToBreakEven() {
+        // Use the break-even year computed in updateUI (stored in currentBreakEvenDecimal)
         let years = currentBreakEvenDecimal;
         if (years >= 50) years = 30;
         else if (years < 1) years = 1;
@@ -451,86 +450,33 @@
         updateUI();
     }
 
-    function updateUI() {
-        // Get values
-        let P = parseFloat(homePriceSlider.value);
-        let rentMonthly0 = parseFloat(rentSlider.value);
-        let downPct = parseFloat(downPercentSlider.value) / 100;
-        let rateYear = parseFloat(rateSlider.value) / 100;
-        let taxRateYear = parseFloat(taxRateSlider.value) / 100;
-        let insuranceYear0 = parseFloat(insuranceSlider.value);
-        let maintPctYear = parseFloat(maintPercentSlider.value) / 100;
-        let closingPct = parseFloat(closingPercentSlider.value) / 100;
-        let sellPct = parseFloat(sellPercentSlider.value) / 100;
-        let appreciationNom = parseFloat(appreciationSlider.value) / 100;
-        let lifestylePct = parseFloat(lifestyleSlider.value) / 100;
-        let diyPct = parseFloat(diySlider.value) / 100;
-        let inflation = parseFloat(inflationSlider.value) / 100;
-        let loanTermMonths = getLoanTermMonths();
+    // Global variable to store break-even year from simulation
+    let currentBreakEvenDecimal = 0;
 
-        let downAmount = P * downPct;
-        let loanAmount = P - downAmount;
+    // Function to simulate a single year and return {renterPortfolio, ownerNetEquity, remainingBalance}
+    function simulateYear(startYear, params, yearsToSim) {
+        // params: { P, downAmount, loanAmount, rateYear, taxRateYear, insuranceYear0, maintPctYear, 
+        //           appreciationNom, lifestylePct, diyPct, inflation, sellPct, loanTermMonths, spyReturnNom }
+        // We'll run simulation from year 0 to yearsToSim and return final values.
+        let portfolioNominal = params.downAmount;
+        let totalContributions = params.downAmount;
+        let currentRent = params.rentMonthly0;
+        let currentHomePrice = params.P;
+        let remainingBalance = params.loanAmount;
+        let currentInsurance = params.insuranceYear0;
+        let monthlyRateSpy = params.spyReturnNom / 12;
+        let rateYear = params.rateYear;
+        let taxRateYear = params.taxRateYear;
+        let maintPctYear = params.maintPctYear;
+        let lifestylePct = params.lifestylePct;
+        let diyPct = params.diyPct;
+        let inflation = params.inflation;
+        let appreciationNom = params.appreciationNom;
+        let sellPct = params.sellPct;
+        let loanTermMonths = params.loanTermMonths;
+        let includeSelling = params.includeSelling;
 
-        // --- Break-even (simple, using constant monthly difference, nominal appreciation) ---
-        let monthlyInterest0 = loanAmount * (rateYear / 12);
-        let monthlyTax0 = P * taxRateYear / 12;
-        let monthlyInsurance0 = insuranceYear0 / 12;
-        let rawMaint0 = P * maintPctYear / 12;
-        let maintDIY0 = rawMaint0 * (1 - diyPct);
-        let monthlyUnrec0 = monthlyInterest0 + monthlyTax0 + monthlyInsurance0 + maintDIY0;
-        let lifestyleBenefit0 = P * lifestylePct / 12;
-        let effectiveOwnCost0 = monthlyUnrec0 - lifestyleBenefit0;
-        let monthlyDiff0 = effectiveOwnCost0 - rentMonthly0;
-
-        let closingCosts = P * closingPct;
-        let sellingCosts = P * sellPct;
-        let totalTransaction = closingCosts + sellingCosts;
-        let breakEvenYears = 999;
-        if (monthlyDiff0 <= 0) breakEvenYears = 0;
-        else {
-            for (let m = 1; m <= 50*12; m++) {
-                let n = m / 12;
-                let equityGain = P * (Math.pow(1 + appreciationNom, n) - 1);
-                let totalCost = totalTransaction + monthlyDiff0 * 12 * n;
-                if (equityGain >= totalCost) { breakEvenYears = n; break; }
-            }
-        }
-        currentBreakEvenDecimal = breakEvenYears;
-        document.getElementById('breakEvenExact').innerHTML = formatYearsMonths(breakEvenYears);
-
-        // Update displayed values on left
-        document.getElementById('homePriceVal').innerText = '$' + P.toLocaleString();
-        document.getElementById('rentVal').innerText = '$' + rentMonthly0.toLocaleString();
-        document.getElementById('downPercentVal').innerText = (downPct*100).toFixed(0) + '%';
-        document.getElementById('rateVal').innerText = (rateYear*100).toFixed(1) + '%';
-        document.getElementById('taxVal').innerText = (taxRateYear*100).toFixed(2) + '%';
-        document.getElementById('insVal').innerText = '$' + insuranceYear0.toLocaleString();
-        document.getElementById('maintPercentVal').innerText = (maintPctYear*100).toFixed(1) + '%';
-        document.getElementById('closingPercentVal').innerText = (closingPct*100).toFixed(1) + '%';
-        document.getElementById('sellPercentVal').innerText = (sellPct*100).toFixed(1) + '%';
-        document.getElementById('apprVal').innerText = (appreciationNom*100).toFixed(1) + '%';
-        document.getElementById('lifestyleVal').innerText = (lifestylePct*100).toFixed(1) + '%';
-        document.getElementById('diyVal').innerText = (diyPct*100).toFixed(0) + '%';
-        document.getElementById('inflationVal').innerText = (inflation*100).toFixed(1) + '%';
-
-        // Comparison year
-        let compareYears = parseFloat(compareYearsSlider.value);
-        document.getElementById('compareYearsVal').innerText = compareYears;
-        document.getElementById('compareYearLabel').innerText = compareYears;
-
-        // --- RENTER: Inflation-adjusted DCA with yearly updated owner costs (including interest reduction) ---
-        let spyReturnNom = parseFloat(spyReturnSlider.value) / 100;
-        document.getElementById('spyReturnVal').innerText = (spyReturnNom*100).toFixed(1) + '%';
-        let monthlyRateSpy = spyReturnNom / 12;
-
-        let portfolioNominal = downAmount;
-        let totalContributions = downAmount;
-        let currentRent = rentMonthly0;
-        let currentHomePrice = P;
-        let remainingBalance = loanAmount;
-        let currentInsurance = insuranceYear0;
-
-        for (let year = 0; year < compareYears; year++) {
+        for (let year = 0; year < yearsToSim; year++) {
             let monthlyInterest = remainingBalance * (rateYear / 12);
             let monthlyTax = currentHomePrice * taxRateYear / 12;
             let monthlyInsurance = currentInsurance / 12;
@@ -561,9 +507,9 @@
             let monthlyPayment = 0;
             let monthlyRateMort = rateYear / 12;
             if (monthlyRateMort > 0) {
-                monthlyPayment = loanAmount * (monthlyRateMort * Math.pow(1 + monthlyRateMort, loanTermMonths)) / (Math.pow(1 + monthlyRateMort, loanTermMonths) - 1);
+                monthlyPayment = params.loanAmount * (monthlyRateMort * Math.pow(1 + monthlyRateMort, loanTermMonths)) / (Math.pow(1 + monthlyRateMort, loanTermMonths) - 1);
             } else {
-                monthlyPayment = loanAmount / loanTermMonths;
+                monthlyPayment = params.loanAmount / loanTermMonths;
             }
             for (let m = 0; m < 12; m++) {
                 if (remainingBalance <= 0) break;
@@ -574,40 +520,111 @@
                 if (remainingBalance < 0) remainingBalance = 0;
             }
         }
+        let homeValueNom = params.P * Math.pow(1 + appreciationNom, yearsToSim);
+        let netEquityBeforeSell = homeValueNom - remainingBalance;
+        let sellingCostAmount = includeSelling ? (homeValueNom * sellPct) : 0;
+        let ownerNetEquity = netEquityBeforeSell - sellingCostAmount;
+        return { renterPortfolio: portfolioNominal, ownerNetEquity, remainingBalance, homeValueNom, totalContributions };
+    }
 
-        let renterPortfolioReal = portfolioNominal / Math.pow(1 + inflation, compareYears);
+    function updateUI() {
+        // Gather parameters
+        let P = parseFloat(homePriceSlider.value);
+        let rentMonthly0 = parseFloat(rentSlider.value);
+        let downPct = parseFloat(downPercentSlider.value) / 100;
+        let rateYear = parseFloat(rateSlider.value) / 100;
+        let taxRateYear = parseFloat(taxRateSlider.value) / 100;
+        let insuranceYear0 = parseFloat(insuranceSlider.value);
+        let maintPctYear = parseFloat(maintPercentSlider.value) / 100;
+        let closingPct = parseFloat(closingPercentSlider.value) / 100;
+        let sellPct = parseFloat(sellPercentSlider.value) / 100;
+        let appreciationNom = parseFloat(appreciationSlider.value) / 100;
+        let lifestylePct = parseFloat(lifestyleSlider.value) / 100;
+        let diyPct = parseFloat(diySlider.value) / 100;
+        let inflation = parseFloat(inflationSlider.value) / 100;
+        let loanTermMonths = getLoanTermMonths();
+        let spyReturnNom = parseFloat(spyReturnSlider.value) / 100;
+        let includeSelling = includeSellingCheckbox.checked;
+        let downAmount = P * downPct;
+        let loanAmount = P - downAmount;
+
+        // Update input displays
+        document.getElementById('homePriceVal').innerText = '$' + P.toLocaleString();
+        document.getElementById('rentVal').innerText = '$' + rentMonthly0.toLocaleString();
+        document.getElementById('downPercentVal').innerText = (downPct*100).toFixed(0) + '%';
+        document.getElementById('rateVal').innerText = (rateYear*100).toFixed(1) + '%';
+        document.getElementById('taxVal').innerText = (taxRateYear*100).toFixed(2) + '%';
+        document.getElementById('insVal').innerText = '$' + insuranceYear0.toLocaleString();
+        document.getElementById('maintPercentVal').innerText = (maintPctYear*100).toFixed(1) + '%';
+        document.getElementById('closingPercentVal').innerText = (closingPct*100).toFixed(1) + '%';
+        document.getElementById('sellPercentVal').innerText = (sellPct*100).toFixed(1) + '%';
+        document.getElementById('apprVal').innerText = (appreciationNom*100).toFixed(1) + '%';
+        document.getElementById('lifestyleVal').innerText = (lifestylePct*100).toFixed(1) + '%';
+        document.getElementById('diyVal').innerText = (diyPct*100).toFixed(0) + '%';
+        document.getElementById('inflationVal').innerText = (inflation*100).toFixed(1) + '%';
+        document.getElementById('spyReturnVal').innerText = (spyReturnNom*100).toFixed(1) + '%';
+
+        // Comparison year
+        let compareYears = parseFloat(compareYearsSlider.value);
+        document.getElementById('compareYearsVal').innerText = compareYears;
+        document.getElementById('compareYearLabel').innerText = compareYears;
+
+        // Build params object for simulation
+        const params = {
+            P, rentMonthly0, downAmount, loanAmount, rateYear, taxRateYear, insuranceYear0,
+            maintPctYear, appreciationNom, lifestylePct, diyPct, inflation, sellPct,
+            loanTermMonths, spyReturnNom, includeSelling
+        };
+
+        // Simulate for compareYears
+        let result = simulateYear(0, params, compareYears);
+        let renterPortfolio = result.renterPortfolio;
+        let ownerNetEquity = result.ownerNetEquity;
+        let remainingBalance = result.remainingBalance;
+        let homeValueNom = result.homeValueNom;
+        let totalContributions = result.totalContributions;
+
+        // Real values
+        let renterPortfolioReal = renterPortfolio / Math.pow(1 + inflation, compareYears);
+        let ownerNetEquityReal = ownerNetEquity / Math.pow(1 + inflation, compareYears);
+
+        // Update comparison table
         document.getElementById('renterLumpSum').innerHTML = '$' + Math.round(downAmount).toLocaleString();
         document.getElementById('renterTotalContributions').innerHTML = '$' + Math.round(totalContributions).toLocaleString();
-        document.getElementById('renterPortfolioNominal').innerHTML = '$' + Math.round(portfolioNominal).toLocaleString();
+        document.getElementById('renterPortfolioNominal').innerHTML = '$' + Math.round(renterPortfolio).toLocaleString();
         document.getElementById('renterPortfolioReal').innerHTML = '$' + Math.round(renterPortfolioReal).toLocaleString();
+        document.getElementById('ownerHomeValueNom').innerHTML = '$' + Math.round(homeValueNom).toLocaleString();
+        document.getElementById('ownerRemainingMortgage').innerHTML = '$' + Math.round(remainingBalance).toLocaleString();
+        document.getElementById('ownerNetEquityNom').innerHTML = '$' + Math.round(ownerNetEquity).toLocaleString();
+        document.getElementById('ownerNetEquityReal').innerHTML = '$' + Math.round(ownerNetEquityReal).toLocaleString();
 
-        // --- OWNER: Home value and net equity (with optional selling cost) ---
-        let homeValueNom = P * Math.pow(1 + appreciationNom, compareYears);
-        let realAppreciation = (1 + appreciationNom) / (1 + inflation) - 1;
-        let homeValueReal = P * Math.pow(1 + realAppreciation, compareYears);
-        let netEquityBeforeSell = homeValueNom - remainingBalance;
-        let sellingCostAmount = includeSellingCheckbox.checked ? (homeValueNom * sellPct) : 0;
-        let netEquityNom = netEquityBeforeSell - sellingCostAmount;
-        let netEquityReal = netEquityNom / Math.pow(1 + inflation, compareYears);
-
-        // Update label for net equity based on checkbox
+        // Update label for net equity
         if (includeSellingCheckbox.checked) {
             netEquityLabel.innerHTML = 'Net equity (after selling costs) <span class="info-icon" data-tooltip="Home value minus remaining mortgage minus selling commission (if you sell)">ℹ️</span>';
         } else {
             netEquityLabel.innerHTML = 'Net equity (before selling costs) <span class="info-icon" data-tooltip="Home value minus remaining mortgage, before deducting any selling commission">ℹ️</span>';
         }
 
-        document.getElementById('ownerHomeValueNom').innerHTML = '$' + Math.round(homeValueNom).toLocaleString();
-        document.getElementById('ownerRemainingMortgage').innerHTML = '$' + Math.round(remainingBalance).toLocaleString();
-        document.getElementById('ownerNetEquityNom').innerHTML = '$' + Math.round(netEquityNom).toLocaleString();
-        document.getElementById('ownerNetEquityReal').innerHTML = '$' + Math.round(netEquityReal).toLocaleString();
-
+        // Verdict at compareYears
         let verdictDiv = document.getElementById('comparisonVerdict');
-        if (netEquityNom > portfolioNominal) {
-            verdictDiv.innerHTML = '🏡 Owner is ahead (nominal) by $' + Math.round(netEquityNom - portfolioNominal).toLocaleString();
+        if (ownerNetEquity > renterPortfolio) {
+            verdictDiv.innerHTML = '🏡 Owner is ahead (nominal) by $' + Math.round(ownerNetEquity - renterPortfolio).toLocaleString();
         } else {
-            verdictDiv.innerHTML = '📈 Renter is ahead (nominal) by $' + Math.round(portfolioNominal - netEquityNom).toLocaleString();
+            verdictDiv.innerHTML = '📈 Renter is ahead (nominal) by $' + Math.round(renterPortfolio - ownerNetEquity).toLocaleString();
         }
+
+        // Compute break-even year using same simulation (search year by year)
+        let breakEvenYear = 999;
+        for (let y = 1; y <= 50; y++) {
+            let resY = simulateYear(0, params, y);
+            if (resY.ownerNetEquity >= resY.renterPortfolio) {
+                breakEvenYear = y;
+                break;
+            }
+        }
+        if (breakEvenYear === 999) breakEvenYear = 50;
+        currentBreakEvenDecimal = breakEvenYear;
+        document.getElementById('breakEvenExact').innerHTML = formatYearsMonths(breakEvenYear);
     }
 
     // Bind all sliders
@@ -616,7 +633,6 @@
     syncBtn.addEventListener('click', syncCompareYearsToBreakEven);
 
     updateUI();
-    syncCompareYearsToBreakEven();
 </script>
 </body>
 </html>
