@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Moat & Main — Rent vs Buy Calculator (Accurate)</title>
+    <title>Moat & Main — Rent vs Buy Calculator (Final)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -105,10 +105,30 @@
         .comparison-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 0.5rem;
             font-size: 0.85rem;
         }
-        .comparison-label { color: #8aaec0; }
+        .comparison-label {
+            color: #8aaec0;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #d4af37;
+            color: #0b1a2f;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: help;
+            text-decoration: none;
+        }
         .comparison-number { font-weight: 600; color: #f5e7a3; }
         .break-even-box {
             background: #0a1f2a;
@@ -139,10 +159,15 @@
             border-radius: 1rem;
             font-size: 0.7rem;
             cursor: pointer;
-            margin-left: 0.5rem;
             transition: 0.2s;
         }
         .inline-button:hover { background: #f5e7a3; }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
         footer {
             margin-top: 2rem;
             text-align: center;
@@ -264,18 +289,46 @@
             <div class="comparison-table">
                 <div class="comparison-col">
                     <h4>🏃 Renter (Invest in SPY)</h4>
-                    <div class="comparison-row"><span class="comparison-label">Down payment invested</span><span class="comparison-number" id="renterLumpSum">$86,000</span></div>
-                    <div class="comparison-row"><span class="comparison-label">Total DCA contributions</span><span class="comparison-number" id="renterTotalContributions">$0</span></div>
-                    <div class="comparison-row"><span class="comparison-label">Nominal portfolio value</span><span class="comparison-number" id="renterPortfolioNominal">$0</span></div>
-                    <div class="comparison-row"><span class="comparison-label">Real portfolio value</span><span class="comparison-number" id="renterPortfolioReal">$0</span></div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Down payment invested <span class="info-icon" title="The down payment amount that a renter keeps and invests as a lump sum">ⓘ</span></span>
+                        <span class="comparison-number" id="renterLumpSum">$86,000</span>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Total DCA contributions <span class="info-icon" title="Total money invested over time: lump sum + all monthly savings from renting">ⓘ</span></span>
+                        <span class="comparison-number" id="renterTotalContributions">$0</span>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Nominal portfolio value <span class="info-icon" title="Future value of all investments before adjusting for inflation">ⓘ</span></span>
+                        <span class="comparison-number" id="renterPortfolioNominal">$0</span>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Real portfolio value <span class="info-icon" title="Portfolio value in today's purchasing power (inflation‑adjusted)">ⓘ</span></span>
+                        <span class="comparison-number" id="renterPortfolioReal">$0</span>
+                    </div>
                 </div>
                 <div class="comparison-col">
                     <h4>🏡 Owner</h4>
-                    <div class="comparison-row"><span class="comparison-label">Nominal home value</span><span class="comparison-number" id="ownerHomeValueNom">$0</span></div>
-                    <div class="comparison-row"><span class="comparison-label">Remaining mortgage</span><span class="comparison-number" id="ownerRemainingMortgage">$0</span></div>
-                    <div class="comparison-row"><span class="comparison-label">Net equity (nominal)</span><span class="comparison-number" id="ownerNetEquityNom">$0</span></div>
-                    <div class="comparison-row"><span class="comparison-label">Real net equity</span><span class="comparison-number" id="ownerNetEquityReal">$0</span></div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Nominal home value <span class="info-icon" title="Home price after applying appreciation">ⓘ</span></span>
+                        <span class="comparison-number" id="ownerHomeValueNom">$0</span>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Remaining mortgage <span class="info-icon" title="Loan balance left after years of payments">ⓘ</span></span>
+                        <span class="comparison-number" id="ownerRemainingMortgage">$0</span>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Net equity (after selling costs) <span class="info-icon" title="Home value minus remaining mortgage minus selling commission (if you sell)">ⓘ</span></span>
+                        <span class="comparison-number" id="ownerNetEquityNom">$0</span>
+                    </div>
+                    <div class="comparison-row">
+                        <span class="comparison-label">Real net equity <span class="info-icon" title="Net equity in today's dollars (inflation‑adjusted)">ⓘ</span></span>
+                        <span class="comparison-number" id="ownerNetEquityReal">$0</span>
+                    </div>
                 </div>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="includeSellingCostCheckbox" checked>
+                <label for="includeSellingCostCheckbox">Include selling commission in owner's net equity</label>
             </div>
             <div class="verdict" id="comparisonVerdict">⚖️ Renter's portfolio is higher at this point</div>
 
@@ -283,7 +336,7 @@
             <div class="break-even-box">
                 <div class="result-label">⏱️ Break‑even (nominal)</div>
                 <div class="break-even-value" id="breakEvenExact">7 years 2 months</div>
-                <div class="note">After this year, owner's net equity surpasses renter's portfolio (nominal).</div>
+                <div class="note">After this year, owner's net equity (after selling costs) surpasses renter's portfolio (nominal).</div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin: 0.8rem 0 0.5rem;">
@@ -301,7 +354,7 @@
             <div class="note">Monthly DCA varies each year because rent and owner costs increase with inflation. The renter invests the monthly difference (if positive) every month.</div>
         </div>
     </div>
-    <footer>moatmain.com — Mental models for life. All calculations include inflation‑adjusted DCA. Selling commission not subtracted from net equity (but included in break‑even).</footer>
+    <footer>moatmain.com — Mental models for life. All calculations include inflation‑adjusted DCA. Selling commission can be toggled in owner net equity.</footer>
 </div>
 
 <script>
@@ -338,6 +391,7 @@
     const compareYearsSlider = document.getElementById('compareYears');
     const syncBtn = document.getElementById('syncBreakEvenBtn');
     const loanTermRadios = document.querySelectorAll('input[name="loanTerm"]');
+    const includeSellingCheckbox = document.getElementById('includeSellingCostCheckbox');
 
     let currentBreakEvenDecimal = 7.2;
 
@@ -361,6 +415,7 @@
     }
     citySelect.addEventListener('change', setCityPreset);
     loanTermRadios.forEach(radio => radio.addEventListener('change', updateUI));
+    includeSellingCheckbox.addEventListener('change', updateUI);
 
     function formatYearsMonths(yearsDecimal) {
         if (yearsDecimal >= 50) return ">50 years";
@@ -454,18 +509,16 @@
         let monthlyRateSpy = spyReturnNom / 12;
 
         // Initialize variables for yearly simulation
-        let portfolioNominal = downAmount;   // lump sum invested at time 0
+        let portfolioNominal = downAmount;
         let totalContributions = downAmount;
         let currentRent = rentMonthly0;
         let currentHomePrice = P;
-        // For amortization: we need remaining balance at start of each year to compute interest
-        let remainingBalance = loanAmount;   // start of year 0
+        let remainingBalance = loanAmount;
         let currentInsurance = insuranceYear0;
-        let monthlyInterest = remainingBalance * (rateYear / 12); // will be updated each year
 
         for (let year = 0; year < compareYears; year++) {
-            // Update owner's monthly cost for this year (using current remaining balance, home price, etc.)
-            monthlyInterest = remainingBalance * (rateYear / 12);
+            // Owner's monthly cost this year
+            let monthlyInterest = remainingBalance * (rateYear / 12);
             let monthlyTax = currentHomePrice * taxRateYear / 12;
             let monthlyInsurance = currentInsurance / 12;
             let rawMaint = currentHomePrice * maintPctYear / 12;
@@ -475,7 +528,7 @@
             let effectiveOwnCost = monthlyUnrec - lifestyleBenefit;
             let monthlySavings = Math.max(0, effectiveOwnCost - currentRent);
 
-            // Invest monthly savings within this year (12 months)
+            // Invest monthly savings within this year
             if (monthlySavings > 0) {
                 let fvYearly = 0;
                 if (monthlyRateSpy > 0) {
@@ -489,13 +542,12 @@
                 portfolioNominal = portfolioNominal * Math.pow(1 + monthlyRateSpy, 12);
             }
 
-            // Update for next year: rent, home price, insurance, and remaining balance (amortization)
+            // Update for next year
             currentRent = currentRent * (1 + inflation);
             currentHomePrice = currentHomePrice * (1 + appreciationNom);
-            currentInsurance = currentInsurance * (1 + inflation); // insurance also inflates
+            currentInsurance = currentInsurance * (1 + inflation);
 
-            // Update remaining balance after paying principal for this year
-            // We need to compute the new balance after 12 payments.
+            // Amortization: reduce remaining balance by principal paid over 12 months
             let monthlyPayment = 0;
             let monthlyRateMort = rateYear / 12;
             if (monthlyRateMort > 0) {
@@ -503,9 +555,6 @@
             } else {
                 monthlyPayment = loanAmount / loanTermMonths;
             }
-            // For simplicity, we reduce remaining balance by principal paid this year.
-            // Better: iterate month by month. We'll do accurate amortization for each month.
-            // To keep it accurate, I'll loop through 12 months inside.
             for (let m = 0; m < 12; m++) {
                 if (remainingBalance <= 0) break;
                 let interestPaid = remainingBalance * monthlyRateMort;
@@ -517,28 +566,31 @@
         }
 
         let renterPortfolioReal = portfolioNominal / Math.pow(1 + inflation, compareYears);
-        document.getElementById('renterLumpSum').innerHTML = '$' + downAmount.toLocaleString();
-        document.getElementById('renterTotalContributions').innerHTML = '$' + totalContributions.toLocaleString();
-        document.getElementById('renterPortfolioNominal').innerHTML = '$' + portfolioNominal.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('renterPortfolioReal').innerHTML = '$' + renterPortfolioReal.toLocaleString(undefined, {maximumFractionDigits: 0});
+        // Format with 0 decimals
+        document.getElementById('renterLumpSum').innerHTML = '$' + Math.round(downAmount).toLocaleString();
+        document.getElementById('renterTotalContributions').innerHTML = '$' + Math.round(totalContributions).toLocaleString();
+        document.getElementById('renterPortfolioNominal').innerHTML = '$' + Math.round(portfolioNominal).toLocaleString();
+        document.getElementById('renterPortfolioReal').innerHTML = '$' + Math.round(renterPortfolioReal).toLocaleString();
 
-        // --- OWNER: Home value and net equity at the comparison year (using remaining balance from above) ---
+        // --- OWNER: Home value and net equity (with optional selling cost) ---
         let homeValueNom = P * Math.pow(1 + appreciationNom, compareYears);
         let realAppreciation = (1 + appreciationNom) / (1 + inflation) - 1;
         let homeValueReal = P * Math.pow(1 + realAppreciation, compareYears);
-        // Remaining balance after `compareYears` is already computed in the loop above (final `remainingBalance`)
-        let netEquityNom = homeValueNom - remainingBalance;
+        let netEquityBeforeSell = homeValueNom - remainingBalance;
+        let sellingCostAmount = includeSellingCheckbox.checked ? (homeValueNom * sellPct) : 0;
+        let netEquityNom = netEquityBeforeSell - sellingCostAmount;
         let netEquityReal = netEquityNom / Math.pow(1 + inflation, compareYears);
-        document.getElementById('ownerHomeValueNom').innerHTML = '$' + homeValueNom.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('ownerRemainingMortgage').innerHTML = '$' + remainingBalance.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('ownerNetEquityNom').innerHTML = '$' + netEquityNom.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('ownerNetEquityReal').innerHTML = '$' + netEquityReal.toLocaleString(undefined, {maximumFractionDigits: 0});
+
+        document.getElementById('ownerHomeValueNom').innerHTML = '$' + Math.round(homeValueNom).toLocaleString();
+        document.getElementById('ownerRemainingMortgage').innerHTML = '$' + Math.round(remainingBalance).toLocaleString();
+        document.getElementById('ownerNetEquityNom').innerHTML = '$' + Math.round(netEquityNom).toLocaleString();
+        document.getElementById('ownerNetEquityReal').innerHTML = '$' + Math.round(netEquityReal).toLocaleString();
 
         let verdictDiv = document.getElementById('comparisonVerdict');
         if (netEquityNom > portfolioNominal) {
-            verdictDiv.innerHTML = '🏡 Owner is ahead (nominal) by $' + (netEquityNom - portfolioNominal).toLocaleString(undefined, {maximumFractionDigits: 0});
+            verdictDiv.innerHTML = '🏡 Owner is ahead (nominal) by $' + Math.round(netEquityNom - portfolioNominal).toLocaleString();
         } else {
-            verdictDiv.innerHTML = '📈 Renter is ahead (nominal) by $' + (portfolioNominal - netEquityNom).toLocaleString(undefined, {maximumFractionDigits: 0});
+            verdictDiv.innerHTML = '📈 Renter is ahead (nominal) by $' + Math.round(portfolioNominal - netEquityNom).toLocaleString();
         }
     }
 
