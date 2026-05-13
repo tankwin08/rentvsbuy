@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Moat & Main — Rent vs Buy Calculator (with Loan Term)</title>
+    <title>Moat & Main — Rent vs Buy Calculator (Accurate)</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0b1a2f;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
@@ -24,15 +20,8 @@
             gap: 2rem;
             align-items: start;
         }
-        .inputs-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-        .results-panel {
-            position: sticky;
-            top: 2rem;
-        }
+        .inputs-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+        .results-panel { position: sticky; top: 2rem; }
         .card {
             background: #0f212e;
             border-radius: 1.5rem;
@@ -51,9 +40,7 @@
             border-left: 3px solid #d4af37;
             padding-left: 0.75rem;
         }
-        .slider-group {
-            margin-bottom: 1.2rem;
-        }
+        .slider-group { margin-bottom: 1.2rem; }
         .slider-group label {
             display: flex;
             justify-content: space-between;
@@ -93,40 +80,36 @@
             font-weight: normal;
             cursor: pointer;
         }
-        input[type="range"] {
-            padding: 0;
-            accent-color: #d4af37;
-        }
         .results-card {
             background: linear-gradient(135deg, #0a1a24 0%, #08212e 100%);
             border: 2px solid #d4af37;
         }
-        .result-grid {
+        .comparison-table {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin: 1rem 0;
         }
-        .result-item {
+        .comparison-col {
             background: #07121b;
             border-radius: 1rem;
-            padding: 0.8rem;
-            text-align: center;
+            padding: 1rem;
             border: 1px solid #2c4b64;
         }
-        .result-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #8aaec0;
-            margin-bottom: 0.3rem;
-        }
-        .result-number {
-            font-size: 1.4rem;
-            font-weight: 700;
+        .comparison-col h4 {
             color: #f5e7a3;
-            line-height: 1.2;
+            margin-bottom: 0.8rem;
+            text-align: center;
+            font-size: 1.1rem;
         }
+        .comparison-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .comparison-label { color: #8aaec0; }
+        .comparison-number { font-weight: 600; color: #f5e7a3; }
         .break-even-box {
             background: #0a1f2a;
             border-radius: 1rem;
@@ -135,11 +118,7 @@
             text-align: center;
             border: 1px solid #f5e7a3;
         }
-        .break-even-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #f5e7a3;
-        }
+        .break-even-value { font-size: 1.8rem; font-weight: 800; color: #f5e7a3; }
         .verdict {
             background: #1a2f3c;
             border-radius: 1rem;
@@ -150,12 +129,7 @@
             margin: 0.8rem 0;
             border-left: 4px solid #d4af37;
         }
-        .note {
-            font-size: 0.7rem;
-            color: #7e9eb5;
-            text-align: center;
-            margin-top: 0.5rem;
-        }
+        .note { font-size: 0.7rem; color: #7e9eb5; text-align: center; margin-top: 0.5rem; }
         .inline-button {
             background: #d4af37;
             border: none;
@@ -168,9 +142,7 @@
             margin-left: 0.5rem;
             transition: 0.2s;
         }
-        .inline-button:hover {
-            background: #f5e7a3;
-        }
+        .inline-button:hover { background: #f5e7a3; }
         footer {
             margin-top: 2rem;
             text-align: center;
@@ -183,17 +155,13 @@
             .app-container { grid-template-columns: 1fr; gap: 1.5rem; }
             .results-panel { position: static; }
         }
-        hr {
-            border-color: #2c4b64;
-            margin: 0.8rem 0;
-        }
+        hr { border-color: #2c4b64; margin: 0.8rem 0; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <!-- LEFT COLUMN -->
     <div class="inputs-panel">
-        <!-- City Preset -->
         <div class="card">
             <h3>📍 City / Metro (preset)</h3>
             <select id="citySelect">
@@ -212,7 +180,6 @@
             <div class="note">Selecting a city adjusts the sliders below. You can still fine‑tune each value.</div>
         </div>
 
-        <!-- Property & Market -->
         <div class="card">
             <h3>🏠 Property & Market</h3>
             <div class="slider-group">
@@ -234,8 +201,8 @@
             <div class="slider-group">
                 <label>Loan term</label>
                 <div class="term-selector">
-                    <label><input type="radio" name="loanTerm" value="15"> 15 years</label>
-                    <label><input type="radio" name="loanTerm" value="30" checked> 30 years</label>
+                    <label><input type="radio" name="loanTerm" value="15" checked> 15 years</label>
+                    <label><input type="radio" name="loanTerm" value="30"> 30 years</label>
                 </div>
             </div>
             <div class="slider-group">
@@ -252,7 +219,6 @@
             </div>
         </div>
 
-        <!-- One-time & Transaction Costs -->
         <div class="card">
             <h3>💰 One‑time & Transaction Costs</h3>
             <div class="slider-group">
@@ -269,7 +235,6 @@
             </div>
         </div>
 
-        <!-- Lifestyle & Handiness -->
         <div class="card">
             <h3>❤️ Lifestyle & Handiness</h3>
             <div class="slider-group">
@@ -282,74 +247,61 @@
             </div>
         </div>
 
-        <!-- Inflation -->
         <div class="card">
             <h3>📉 Inflation</h3>
             <div class="slider-group">
                 <label>Expected inflation (% per year) <span id="inflationVal" class="value-display">2.5%</span></label>
                 <input type="range" id="inflation" min="0" max="6" step="0.1" value="2.5">
             </div>
-            <div class="note">Inflation reduces real returns and real home appreciation. All real (inflation‑adjusted) values are shown below.</div>
+            <div class="note">Inflation increases rent and owner costs yearly. Monthly DCA is recalculated each year.</div>
         </div>
     </div>
 
     <!-- RIGHT COLUMN: RESULTS -->
     <div class="results-panel">
         <div class="card results-card">
-            <h3>📊 Your Results</h3>
-            <div class="result-grid">
-                <div class="result-item"><div class="result-label">Monthly owner cost (unrecoverable)</div><div class="result-number" id="monthlyOwnCost">$2,507</div></div>
-                <div class="result-item"><div class="result-label">Monthly rent</div><div class="result-number" id="monthlyRentShow">$2,300</div></div>
-                <div class="result-item"><div class="result-label">Owner premium (own - rent)</div><div class="result-number" id="premiumDiff">+$207</div></div>
-                <div class="result-item"><div class="result-label">Lifestyle benefit (monthly)</div><div class="result-number" id="lifestyleBenefitMonthly">$0</div></div>
+            <h3>📊 Comparison at Year <span id="compareYearLabel">7</span></h3>
+            <div class="comparison-table">
+                <div class="comparison-col">
+                    <h4>🏃 Renter (Invest in SPY)</h4>
+                    <div class="comparison-row"><span class="comparison-label">Down payment invested</span><span class="comparison-number" id="renterLumpSum">$86,000</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Total DCA contributions</span><span class="comparison-number" id="renterTotalContributions">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Nominal portfolio value</span><span class="comparison-number" id="renterPortfolioNominal">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Real portfolio value</span><span class="comparison-number" id="renterPortfolioReal">$0</span></div>
+                </div>
+                <div class="comparison-col">
+                    <h4>🏡 Owner</h4>
+                    <div class="comparison-row"><span class="comparison-label">Nominal home value</span><span class="comparison-number" id="ownerHomeValueNom">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Remaining mortgage</span><span class="comparison-number" id="ownerRemainingMortgage">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Net equity (nominal)</span><span class="comparison-number" id="ownerNetEquityNom">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Real net equity</span><span class="comparison-number" id="ownerNetEquityReal">$0</span></div>
+                </div>
             </div>
-            <div class="result-grid">
-                <div class="result-item"><div class="result-label">Transaction frictions</div><div class="result-number" id="transactionFriction">$37,840</div></div>
-                <div class="result-item"><div class="result-label">Break‑even (years)</div><div class="result-number" id="breakEvenYears">7.2 yrs</div></div>
-            </div>
-            <div class="break-even-box">
-                <div class="result-label">⏱️ Exact break‑even (nominal)</div>
-                <div class="break-even-value" id="breakEvenExact">7 years 2 months</div>
-                <div class="note">(including lifestyle & DIY savings)</div>
-            </div>
-            <div class="verdict" id="verdict">⚖️ Borderline — need 7y 2m to break even</div>
+            <div class="verdict" id="comparisonVerdict">⚖️ Renter's portfolio is higher at this point</div>
+
             <hr>
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
-                <h3 style="font-size:1.1rem;">📈 Rent & Invest in SPY (DCA)</h3>
-                <button id="syncBreakEvenBtn" class="inline-button">↻ Use break-even year</button>
+            <div class="break-even-box">
+                <div class="result-label">⏱️ Break‑even (nominal)</div>
+                <div class="break-even-value" id="breakEvenExact">7 years 2 months</div>
+                <div class="note">After this year, owner's net equity surpasses renter's portfolio (nominal).</div>
             </div>
-            <div class="slider-group">
-                <label>Expected nominal return (SPY) % <span id="spyReturnVal" class="value-display">9.0%</span></label>
-                <input type="range" id="spyReturn" min="0" max="15" step="0.5" value="9">
+
+            <div style="display: flex; justify-content: space-between; margin: 0.8rem 0 0.5rem;">
+                <h3 style="font-size:1rem;">📈 Adjust comparison year</h3>
+                <button id="syncBreakEvenBtn" class="inline-button">↻ Set to break‑even year</button>
             </div>
             <div class="slider-group">
                 <label>Years to compare <span id="compareYearsVal" class="value-display">7</span></label>
                 <input type="range" id="compareYears" min="1" max="30" step="1" value="7">
             </div>
-            <div class="result-item" style="margin-bottom: 1rem;">
-                <div class="result-label">Monthly DCA amount (savings from renting)</div>
-                <div class="result-number" id="monthlyDCA">$207</div>
-                <div class="note">Invested when owner cost > rent (renter saves the difference)</div>
+            <div class="slider-group">
+                <label>Expected nominal return (SPY) % <span id="spyReturnVal" class="value-display">9.0%</span></label>
+                <input type="range" id="spyReturn" min="0" max="15" step="0.5" value="9">
             </div>
-            <div class="result-grid">
-                <div class="result-item"><div class="result-label">Lump sum (down payment)</div><div class="result-number" id="investLumpSum">$86,000</div></div>
-                <div class="result-item"><div class="result-label">Total DCA contributions (over years)</div><div class="result-number" id="totalContributions">$0</div></div>
-                <div class="result-item"><div class="result-label">Nominal portfolio value</div><div class="result-number" id="futurePortfolioNominal">$0</div></div>
-                <div class="result-item"><div class="result-label">Real (inflation‑adj.) portfolio value</div><div class="result-number" id="futurePortfolioReal">$0</div></div>
-            </div>
-
-            <hr>
-            <h3 style="font-size:1.1rem;">🏡 Home Equity & Value at that time</h3>
-            <div class="result-grid">
-                <div class="result-item"><div class="result-label">Nominal home value</div><div class="result-number" id="homeValueNominal">$0</div></div>
-                <div class="result-item"><div class="result-label">Real home value (inflation‑adj.)</div><div class="result-number" id="homeValueReal">$0</div></div>
-                <div class="result-item"><div class="result-label">Remaining mortgage balance</div><div class="result-number" id="remainingMortgage">$0</div></div>
-                <div class="result-item"><div class="result-label">Net home equity (before selling costs)</div><div class="result-number" id="netEquity">$0</div></div>
-            </div>
-            <div class="note">Net equity = home value − remaining mortgage. Selling commission (if any) would reduce net equity further. Principal paid = down payment + (loan − remaining mortgage).</div>
+            <div class="note">Monthly DCA varies each year because rent and owner costs increase with inflation. The renter invests the monthly difference (if positive) every month.</div>
         </div>
     </div>
-    <footer>moatmain.com — Mental models for life. All calculations include inflation adjustments for real values.</footer>
+    <footer>moatmain.com — Mental models for life. All calculations include inflation‑adjusted DCA. Selling commission not subtracted from net equity (but included in break‑even).</footer>
 </div>
 
 <script>
@@ -388,15 +340,10 @@
     const loanTermRadios = document.querySelectorAll('input[name="loanTerm"]');
 
     let currentBreakEvenDecimal = 7.2;
-    let loanTermMonths = 360; // default 30 years
 
     function getLoanTermMonths() {
-        for (let radio of loanTermRadios) {
-            if (radio.checked) {
-                return parseInt(radio.value) * 12;
-            }
-        }
-        return 360;
+        for (let radio of loanTermRadios) if (radio.checked) return parseInt(radio.value) * 12;
+        return 180;
     }
 
     function setCityPreset() {
@@ -437,11 +384,11 @@
     function updateUI() {
         // Get values
         let P = parseFloat(homePriceSlider.value);
-        let rentMonthly = parseFloat(rentSlider.value);
+        let rentMonthly0 = parseFloat(rentSlider.value);
         let downPct = parseFloat(downPercentSlider.value) / 100;
         let rateYear = parseFloat(rateSlider.value) / 100;
         let taxRateYear = parseFloat(taxRateSlider.value) / 100;
-        let insuranceYear = parseFloat(insuranceSlider.value);
+        let insuranceYear0 = parseFloat(insuranceSlider.value);
         let maintPctYear = parseFloat(maintPercentSlider.value) / 100;
         let closingPct = parseFloat(closingPercentSlider.value) / 100;
         let sellPct = parseFloat(sellPercentSlider.value) / 100;
@@ -449,52 +396,45 @@
         let lifestylePct = parseFloat(lifestyleSlider.value) / 100;
         let diyPct = parseFloat(diySlider.value) / 100;
         let inflation = parseFloat(inflationSlider.value) / 100;
-        loanTermMonths = getLoanTermMonths();
+        let loanTermMonths = getLoanTermMonths();
 
-        // Monthly costs
         let downAmount = P * downPct;
         let loanAmount = P - downAmount;
-        let monthlyInterest = loanAmount * (rateYear / 12);
-        let monthlyTax = P * taxRateYear / 12;
-        let monthlyInsurance = insuranceYear / 12;
-        let rawMonthlyMaintenance = P * maintPctYear / 12;
-        let monthlyMaintenanceDIY = rawMonthlyMaintenance * (1 - diyPct);
-        let monthlyUnrecoverable = monthlyInterest + monthlyTax + monthlyInsurance + monthlyMaintenanceDIY;
-        let monthlyLifestyleBenefit = P * lifestylePct / 12;
-        let effectiveMonthlyOwnCost = monthlyUnrecoverable - monthlyLifestyleBenefit;
-        let monthlyDifference = effectiveMonthlyOwnCost - rentMonthly; // positive -> owning more expensive
+
+        // --- Break-even (simple, using constant monthly difference, nominal appreciation) ---
+        let monthlyInterest0 = loanAmount * (rateYear / 12);
+        let monthlyTax0 = P * taxRateYear / 12;
+        let monthlyInsurance0 = insuranceYear0 / 12;
+        let rawMaint0 = P * maintPctYear / 12;
+        let maintDIY0 = rawMaint0 * (1 - diyPct);
+        let monthlyUnrec0 = monthlyInterest0 + monthlyTax0 + monthlyInsurance0 + maintDIY0;
+        let lifestyleBenefit0 = P * lifestylePct / 12;
+        let effectiveOwnCost0 = monthlyUnrec0 - lifestyleBenefit0;
+        let monthlyDiff0 = effectiveOwnCost0 - rentMonthly0;
 
         let closingCosts = P * closingPct;
         let sellingCosts = P * sellPct;
         let totalTransaction = closingCosts + sellingCosts;
-
-        // Break-even using nominal appreciation (same as before)
-        let breakEvenYearsDecimal = 999;
-        if (monthlyDifference <= 0) {
-            breakEvenYearsDecimal = 0;
-        } else {
-            let found = false;
-            for (let months = 1; months <= 50*12; months++) {
-                let n = months / 12;
-                let equityGainNom = P * (Math.pow(1 + appreciationNom, n) - 1);
-                let totalCostNom = totalTransaction + monthlyDifference * 12 * n;
-                if (equityGainNom >= totalCostNom) {
-                    breakEvenYearsDecimal = n;
-                    found = true;
-                    break;
-                }
+        let breakEvenYears = 999;
+        if (monthlyDiff0 <= 0) breakEvenYears = 0;
+        else {
+            for (let m = 1; m <= 50*12; m++) {
+                let n = m / 12;
+                let equityGain = P * (Math.pow(1 + appreciationNom, n) - 1);
+                let totalCost = totalTransaction + monthlyDiff0 * 12 * n;
+                if (equityGain >= totalCost) { breakEvenYears = n; break; }
             }
-            if (!found) breakEvenYearsDecimal = 999;
         }
-        currentBreakEvenDecimal = breakEvenYearsDecimal;
+        currentBreakEvenDecimal = breakEvenYears;
+        document.getElementById('breakEvenExact').innerHTML = formatYearsMonths(breakEvenYears);
 
-        // Update displayed input values
+        // Update displayed values on left
         document.getElementById('homePriceVal').innerText = '$' + P.toLocaleString();
-        document.getElementById('rentVal').innerText = '$' + rentMonthly.toLocaleString();
+        document.getElementById('rentVal').innerText = '$' + rentMonthly0.toLocaleString();
         document.getElementById('downPercentVal').innerText = (downPct*100).toFixed(0) + '%';
         document.getElementById('rateVal').innerText = (rateYear*100).toFixed(1) + '%';
         document.getElementById('taxVal').innerText = (taxRateYear*100).toFixed(2) + '%';
-        document.getElementById('insVal').innerText = '$' + insuranceYear.toLocaleString();
+        document.getElementById('insVal').innerText = '$' + insuranceYear0.toLocaleString();
         document.getElementById('maintPercentVal').innerText = (maintPctYear*100).toFixed(1) + '%';
         document.getElementById('closingPercentVal').innerText = (closingPct*100).toFixed(1) + '%';
         document.getElementById('sellPercentVal').innerText = (sellPct*100).toFixed(1) + '%';
@@ -503,82 +443,108 @@
         document.getElementById('diyVal').innerText = (diyPct*100).toFixed(0) + '%';
         document.getElementById('inflationVal').innerText = (inflation*100).toFixed(1) + '%';
 
-        document.getElementById('monthlyOwnCost').innerHTML = '$' + monthlyUnrecoverable.toFixed(0);
-        document.getElementById('monthlyRentShow').innerHTML = '$' + rentMonthly.toFixed(0);
-        let premium = effectiveMonthlyOwnCost - rentMonthly;
-        document.getElementById('premiumDiff').innerHTML = (premium > 0 ? '+' : '') + '$' + premium.toFixed(0);
-        document.getElementById('lifestyleBenefitMonthly').innerHTML = '$' + monthlyLifestyleBenefit.toFixed(0);
-        document.getElementById('transactionFriction').innerHTML = '$' + totalTransaction.toLocaleString();
-        document.getElementById('breakEvenYears').innerHTML = breakEvenYearsDecimal >= 50 ? '>50 yrs' : breakEvenYearsDecimal.toFixed(1) + ' yrs';
-        document.getElementById('breakEvenExact').innerHTML = formatYearsMonths(breakEvenYearsDecimal);
-
-        let verdictDiv = document.getElementById('verdict');
-        if (breakEvenYearsDecimal === 0) {
-            verdictDiv.innerHTML = '✅ Owning is cheaper from month one (after lifestyle & DIY)';
-        } else if (breakEvenYearsDecimal < 5) {
-            verdictDiv.innerHTML = '🏡 Buy likely wins — break‑even in ' + formatYearsMonths(breakEvenYearsDecimal);
-        } else if (breakEvenYearsDecimal <= 10) {
-            verdictDiv.innerHTML = '⚖️ Borderline — need ' + formatYearsMonths(breakEvenYearsDecimal) + ' to break even';
-        } else {
-            verdictDiv.innerHTML = '🔁 Rent is better — break‑even > ' + (breakEvenYearsDecimal >= 50 ? '50 years' : formatYearsMonths(breakEvenYearsDecimal));
-        }
-
-        // SPY investment
-        let spyReturnNom = parseFloat(spyReturnSlider.value) / 100;
+        // Comparison year
         let compareYears = parseFloat(compareYearsSlider.value);
-        document.getElementById('spyReturnVal').innerText = (spyReturnNom*100).toFixed(1) + '%';
         document.getElementById('compareYearsVal').innerText = compareYears;
+        document.getElementById('compareYearLabel').innerText = compareYears;
 
-        let monthlySavings = Math.max(0, effectiveMonthlyOwnCost - rentMonthly);
-        document.getElementById('monthlyDCA').innerHTML = '$' + monthlySavings.toFixed(0);
-        let lumpSumInvest = downAmount;
-        let monthlyRateNom = spyReturnNom / 12;
-        let monthsTotal = compareYears * 12;
-        let fvLumpNom = lumpSumInvest * Math.pow(1 + monthlyRateNom, monthsTotal);
-        let fvDCANom = 0;
-        if (monthlyRateNom > 0 && monthlySavings > 0) {
-            fvDCANom = monthlySavings * (Math.pow(1 + monthlyRateNom, monthsTotal) - 1) / monthlyRateNom;
-        } else if (monthlyRateNom === 0) {
-            fvDCANom = monthlySavings * monthsTotal;
+        // --- RENTER: Inflation-adjusted DCA with yearly updated owner costs (including interest reduction) ---
+        let spyReturnNom = parseFloat(spyReturnSlider.value) / 100;
+        document.getElementById('spyReturnVal').innerText = (spyReturnNom*100).toFixed(1) + '%';
+        let monthlyRateSpy = spyReturnNom / 12;
+
+        // Initialize variables for yearly simulation
+        let portfolioNominal = downAmount;   // lump sum invested at time 0
+        let totalContributions = downAmount;
+        let currentRent = rentMonthly0;
+        let currentHomePrice = P;
+        // For amortization: we need remaining balance at start of each year to compute interest
+        let remainingBalance = loanAmount;   // start of year 0
+        let currentInsurance = insuranceYear0;
+        let monthlyInterest = remainingBalance * (rateYear / 12); // will be updated each year
+
+        for (let year = 0; year < compareYears; year++) {
+            // Update owner's monthly cost for this year (using current remaining balance, home price, etc.)
+            monthlyInterest = remainingBalance * (rateYear / 12);
+            let monthlyTax = currentHomePrice * taxRateYear / 12;
+            let monthlyInsurance = currentInsurance / 12;
+            let rawMaint = currentHomePrice * maintPctYear / 12;
+            let maintDIY = rawMaint * (1 - diyPct);
+            let monthlyUnrec = monthlyInterest + monthlyTax + monthlyInsurance + maintDIY;
+            let lifestyleBenefit = currentHomePrice * lifestylePct / 12;
+            let effectiveOwnCost = monthlyUnrec - lifestyleBenefit;
+            let monthlySavings = Math.max(0, effectiveOwnCost - currentRent);
+
+            // Invest monthly savings within this year (12 months)
+            if (monthlySavings > 0) {
+                let fvYearly = 0;
+                if (monthlyRateSpy > 0) {
+                    fvYearly = monthlySavings * (Math.pow(1 + monthlyRateSpy, 12) - 1) / monthlyRateSpy;
+                } else {
+                    fvYearly = monthlySavings * 12;
+                }
+                portfolioNominal = portfolioNominal * Math.pow(1 + monthlyRateSpy, 12) + fvYearly;
+                totalContributions += monthlySavings * 12;
+            } else {
+                portfolioNominal = portfolioNominal * Math.pow(1 + monthlyRateSpy, 12);
+            }
+
+            // Update for next year: rent, home price, insurance, and remaining balance (amortization)
+            currentRent = currentRent * (1 + inflation);
+            currentHomePrice = currentHomePrice * (1 + appreciationNom);
+            currentInsurance = currentInsurance * (1 + inflation); // insurance also inflates
+
+            // Update remaining balance after paying principal for this year
+            // We need to compute the new balance after 12 payments.
+            let monthlyPayment = 0;
+            let monthlyRateMort = rateYear / 12;
+            if (monthlyRateMort > 0) {
+                monthlyPayment = loanAmount * (monthlyRateMort * Math.pow(1 + monthlyRateMort, loanTermMonths)) / (Math.pow(1 + monthlyRateMort, loanTermMonths) - 1);
+            } else {
+                monthlyPayment = loanAmount / loanTermMonths;
+            }
+            // For simplicity, we reduce remaining balance by principal paid this year.
+            // Better: iterate month by month. We'll do accurate amortization for each month.
+            // To keep it accurate, I'll loop through 12 months inside.
+            for (let m = 0; m < 12; m++) {
+                if (remainingBalance <= 0) break;
+                let interestPaid = remainingBalance * monthlyRateMort;
+                let principalPaid = monthlyPayment - interestPaid;
+                if (principalPaid > remainingBalance) principalPaid = remainingBalance;
+                remainingBalance -= principalPaid;
+                if (remainingBalance < 0) remainingBalance = 0;
+            }
         }
-        let totalPortfolioNom = fvLumpNom + fvDCANom;
-        let totalContributions = lumpSumInvest + monthlySavings * monthsTotal;
-        document.getElementById('investLumpSum').innerHTML = '$' + lumpSumInvest.toLocaleString();
-        document.getElementById('totalContributions').innerHTML = '$' + totalContributions.toLocaleString();
-        document.getElementById('futurePortfolioNominal').innerHTML = '$' + totalPortfolioNom.toLocaleString(undefined, {maximumFractionDigits: 0});
-        let realPortfolio = totalPortfolioNom / Math.pow(1 + inflation, compareYears);
-        document.getElementById('futurePortfolioReal').innerHTML = '$' + realPortfolio.toLocaleString(undefined, {maximumFractionDigits: 0});
 
-        // Home equity with correct loan term
+        let renterPortfolioReal = portfolioNominal / Math.pow(1 + inflation, compareYears);
+        document.getElementById('renterLumpSum').innerHTML = '$' + downAmount.toLocaleString();
+        document.getElementById('renterTotalContributions').innerHTML = '$' + totalContributions.toLocaleString();
+        document.getElementById('renterPortfolioNominal').innerHTML = '$' + portfolioNominal.toLocaleString(undefined, {maximumFractionDigits: 0});
+        document.getElementById('renterPortfolioReal').innerHTML = '$' + renterPortfolioReal.toLocaleString(undefined, {maximumFractionDigits: 0});
+
+        // --- OWNER: Home value and net equity at the comparison year (using remaining balance from above) ---
         let homeValueNom = P * Math.pow(1 + appreciationNom, compareYears);
         let realAppreciation = (1 + appreciationNom) / (1 + inflation) - 1;
         let homeValueReal = P * Math.pow(1 + realAppreciation, compareYears);
-        document.getElementById('homeValueNominal').innerHTML = '$' + homeValueNom.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('homeValueReal').innerHTML = '$' + homeValueReal.toLocaleString(undefined, {maximumFractionDigits: 0});
+        // Remaining balance after `compareYears` is already computed in the loop above (final `remainingBalance`)
+        let netEquityNom = homeValueNom - remainingBalance;
+        let netEquityReal = netEquityNom / Math.pow(1 + inflation, compareYears);
+        document.getElementById('ownerHomeValueNom').innerHTML = '$' + homeValueNom.toLocaleString(undefined, {maximumFractionDigits: 0});
+        document.getElementById('ownerRemainingMortgage').innerHTML = '$' + remainingBalance.toLocaleString(undefined, {maximumFractionDigits: 0});
+        document.getElementById('ownerNetEquityNom').innerHTML = '$' + netEquityNom.toLocaleString(undefined, {maximumFractionDigits: 0});
+        document.getElementById('ownerNetEquityReal').innerHTML = '$' + netEquityReal.toLocaleString(undefined, {maximumFractionDigits: 0});
 
-        // Remaining mortgage balance after compareYears using the chosen loan term
-        let monthlyRate = rateYear / 12;
-        let totalMonthsLoan = loanTermMonths;
-        let monthsPaid = compareYears * 12;
-        if (monthsPaid > totalMonthsLoan) monthsPaid = totalMonthsLoan;
-        let remainingBalance = 0;
-        if (monthlyRate > 0) {
-            let factor = Math.pow(1 + monthlyRate, totalMonthsLoan);
-            let factorPaid = Math.pow(1 + monthlyRate, monthsPaid);
-            remainingBalance = loanAmount * ( (factor - factorPaid) / (factor - 1) );
+        let verdictDiv = document.getElementById('comparisonVerdict');
+        if (netEquityNom > portfolioNominal) {
+            verdictDiv.innerHTML = '🏡 Owner is ahead (nominal) by $' + (netEquityNom - portfolioNominal).toLocaleString(undefined, {maximumFractionDigits: 0});
         } else {
-            remainingBalance = loanAmount * (1 - monthsPaid / totalMonthsLoan);
+            verdictDiv.innerHTML = '📈 Renter is ahead (nominal) by $' + (portfolioNominal - netEquityNom).toLocaleString(undefined, {maximumFractionDigits: 0});
         }
-        let netEquity = homeValueNom - remainingBalance;
-        document.getElementById('remainingMortgage').innerHTML = '$' + remainingBalance.toLocaleString(undefined, {maximumFractionDigits: 0});
-        document.getElementById('netEquity').innerHTML = '$' + netEquity.toLocaleString(undefined, {maximumFractionDigits: 0});
     }
 
     // Bind all sliders
     const sliders = ['homePrice', 'rent', 'downPercent', 'rate', 'taxRate', 'insurance', 'maintPercent', 'closingPercent', 'sellPercent', 'appreciation', 'lifestyle', 'diy', 'inflation', 'spyReturn', 'compareYears'];
-    sliders.forEach(id => {
-        document.getElementById(id).addEventListener('input', updateUI);
-    });
+    sliders.forEach(id => document.getElementById(id).addEventListener('input', updateUI));
     syncBtn.addEventListener('click', syncCompareYearsToBreakEven);
 
     updateUI();
