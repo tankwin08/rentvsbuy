@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Moat & Main — Rent vs Buy Calculator (Final)</title>
+    <title>Moat & Main — Rent vs Buy Calculator (Fixed)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -66,20 +67,8 @@
             color: #f5e7a3;
             border-radius: 0.75rem;
             font-size: 0.9rem;
-            cursor: pointer;
         }
-        .term-selector {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-        .term-selector label {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-weight: normal;
-            cursor: pointer;
-        }
+        .term-selector { display: flex; gap: 1rem; margin-top: 0.5rem; }
         .results-card {
             background: linear-gradient(135deg, #0a1a24 0%, #08212e 100%);
             border: 2px solid #d4af37;
@@ -105,45 +94,28 @@
         .comparison-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 0.5rem;
             font-size: 0.85rem;
         }
-        .comparison-label {
-            color: #8aaec0;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        .info-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 1rem;
-            height: 1rem;
-            border-radius: 50%;
-            background: #d4af37;
-            color: #0b1a2f;
-            font-size: 0.7rem;
-            font-weight: bold;
-            cursor: help;
-            text-decoration: none;
-            font-family: monospace;
-        }
-        .info-icon:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            background: #1a2f3c;
-            color: #f5e7a3;
-            font-size: 0.7rem;
-            padding: 0.3rem 0.6rem;
-            border-radius: 0.5rem;
-            white-space: nowrap;
-            z-index: 1000;
-            margin-top: 1.2rem;
-            border: 1px solid #d4af37;
-        }
+        .comparison-label { color: #8aaec0; }
         .comparison-number { font-weight: 600; color: #f5e7a3; }
+        .verdict {
+            background: #1a2f3c;
+            border-radius: 1rem;
+            padding: 0.8rem;
+            text-align: center;
+            font-weight: 600;
+            margin: 0.8rem 0;
+            border-left: 4px solid #d4af37;
+        }
+        .chart-container {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #07121b;
+            border-radius: 1rem;
+            border: 1px solid #2c4b64;
+            height: 300px;          /* FIX: explicit height so Chart.js can render */
+        }
         .break-even-box {
             background: #0a1f2a;
             border-radius: 1rem;
@@ -152,18 +124,7 @@
             text-align: center;
             border: 1px solid #f5e7a3;
         }
-        .break-even-value { font-size: 1.8rem; font-weight: 800; color: #f5e7a3; }
-        .verdict {
-            background: #1a2f3c;
-            border-radius: 1rem;
-            padding: 0.8rem;
-            text-align: center;
-            font-weight: 600;
-            font-size: 1rem;
-            margin: 0.8rem 0;
-            border-left: 4px solid #d4af37;
-        }
-        .note { font-size: 0.7rem; color: #7e9eb5; text-align: center; margin-top: 0.5rem; }
+        .break-even-value { font-size: 1.5rem; font-weight: 800; color: #f5e7a3; }
         .inline-button {
             background: #d4af37;
             border: none;
@@ -176,12 +137,6 @@
             transition: 0.2s;
         }
         .inline-button:hover { background: #f5e7a3; }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
         footer {
             margin-top: 2rem;
             text-align: center;
@@ -190,11 +145,9 @@
             grid-column: span 2;
         }
         @media (max-width: 850px) {
-            body { padding: 1rem; }
-            .app-container { grid-template-columns: 1fr; gap: 1.5rem; }
+            .app-container { grid-template-columns: 1fr; }
             .results-panel { position: static; }
         }
-        hr { border-color: #2c4b64; margin: 0.8rem 0; }
     </style>
 </head>
 <body>
@@ -204,8 +157,8 @@
         <div class="card">
             <h3>📍 City / Metro (preset)</h3>
             <select id="citySelect">
-                <option value="custom">-- Custom (adjust sliders below) --</option>
-                <option value="national">National Median</option>
+                <option value="custom">-- Custom --</option>
+                <option value="national" selected>National Median</option>
                 <option value="nyc">New York, NY</option>
                 <option value="la">Los Angeles, CA</option>
                 <option value="chi">Chicago, IL</option>
@@ -216,423 +169,400 @@
                 <option value="den">Denver, CO</option>
                 <option value="sea">Seattle, WA</option>
             </select>
-            <div class="note">Selecting a city adjusts the sliders below. You can still fine‑tune each value.</div>
         </div>
 
         <div class="card">
             <h3>🏠 Property & Market</h3>
-            <div class="slider-group">
-                <label>Home price <span id="homePriceVal" class="value-display">$430,000</span></label>
-                <input type="range" id="homePrice" min="100000" max="1500000" step="5000" value="430000">
-            </div>
-            <div class="slider-group">
-                <label>Monthly rent (comparable) <span id="rentVal" class="value-display">$2,300</span></label>
-                <input type="range" id="rent" min="500" max="8000" step="50" value="2300">
-            </div>
-            <div class="slider-group">
-                <label>Down payment (%) <span id="downPercentVal" class="value-display">20%</span></label>
-                <input type="range" id="downPercent" min="3" max="50" step="1" value="20">
-            </div>
-            <div class="slider-group">
-                <label>Mortgage rate (%) <span id="rateVal" class="value-display">5.0%</span></label>
-                <input type="range" id="rate" min="2" max="12" step="0.1" value="5.0">
-            </div>
+            <div class="slider-group"><label>Home price <span id="homePriceVal" class="value-display">$430,000</span></label><input type="range" id="homePrice" min="100000" max="1500000" step="5000" value="430000"></div>
+            <div class="slider-group"><label>Monthly rent <span id="rentVal" class="value-display">$2,300</span></label><input type="range" id="rent" min="500" max="8000" step="50" value="2300"></div>
+            <div class="slider-group"><label>Down payment % <span id="downPercentVal" class="value-display">20%</span></label><input type="range" id="downPercent" min="3" max="50" step="1" value="20"></div>
+            <div class="slider-group"><label>Mortgage rate % <span id="rateVal" class="value-display">6.0%</span></label><input type="range" id="rate" min="2" max="12" step="0.1" value="6.0"></div>
             <div class="slider-group">
                 <label>Loan term</label>
                 <div class="term-selector">
-                    <label><input type="radio" name="loanTerm" value="15" checked> 15 years</label>
-                    <label><input type="radio" name="loanTerm" value="30"> 30 years</label>
+                    <label><input type="radio" name="loanTerm" value="15"> 15 years</label>
+                    <label><input type="radio" name="loanTerm" value="30" checked> 30 years</label>
                 </div>
             </div>
-            <div class="slider-group">
-                <label>Property tax rate (%) <span id="taxVal" class="value-display">1.10%</span></label>
-                <input type="range" id="taxRate" min="0.2" max="3.5" step="0.05" value="1.1">
-            </div>
-            <div class="slider-group">
-                <label>Annual insurance ($) <span id="insVal" class="value-display">$1,700</span></label>
-                <input type="range" id="insurance" min="300" max="6000" step="50" value="1700">
-            </div>
-            <div class="slider-group">
-                <label>Maintenance (% of home value / year) <span id="maintPercentVal" class="value-display">1.5%</span></label>
-                <input type="range" id="maintPercent" min="0.5" max="4" step="0.1" value="1.5">
-            </div>
+            <div class="slider-group"><label>Property tax % <span id="taxVal" class="value-display">1.10%</span></label><input type="range" id="taxRate" min="0.2" max="3.5" step="0.05" value="1.1"></div>
+            <div class="slider-group"><label>Annual insurance $ <span id="insVal" class="value-display">$1,700</span></label><input type="range" id="insurance" min="300" max="6000" step="50" value="1700"></div>
+            <div class="slider-group"><label>Maintenance % <span id="maintPercentVal" class="value-display">1.5%</span></label><input type="range" id="maintPercent" min="0.5" max="4" step="0.1" value="1.5"></div>
         </div>
 
         <div class="card">
-            <h3>💰 One‑time & Transaction Costs</h3>
-            <div class="slider-group">
-                <label>Closing costs (buy) % <span id="closingPercentVal" class="value-display">3.0%</span></label>
-                <input type="range" id="closingPercent" min="1" max="8" step="0.5" value="3">
-            </div>
-            <div class="slider-group">
-                <label>Selling commission % <span id="sellPercentVal" class="value-display">5.8%</span></label>
-                <input type="range" id="sellPercent" min="3" max="10" step="0.2" value="5.8">
-            </div>
-            <div class="slider-group">
-                <label>Expected home appreciation (% per year) <span id="apprVal" class="value-display">3.0%</span></label>
-                <input type="range" id="appreciation" min="0" max="8" step="0.25" value="3">
-            </div>
+            <h3>💰 One-time & Transaction Costs</h3>
+            <div class="slider-group"><label>Closing costs % <span id="closingPercentVal" class="value-display">3.0%</span></label><input type="range" id="closingPercent" min="1" max="8" step="0.5" value="3"></div>
+            <div class="slider-group"><label>Selling commission % <span id="sellPercentVal" class="value-display">5.8%</span></label><input type="range" id="sellPercent" min="3" max="10" step="0.2" value="5.8"></div>
+            <div class="slider-group"><label>Home appreciation % <span id="apprVal" class="value-display">3.0%</span></label><input type="range" id="appreciation" min="0" max="8" step="0.25" value="3"></div>
         </div>
 
         <div class="card">
             <h3>❤️ Lifestyle & Handiness</h3>
-            <div class="slider-group">
-                <label>Lifestyle benefit (% of home value/year) <span id="lifestyleVal" class="value-display">0%</span></label>
-                <input type="range" id="lifestyle" min="0" max="5" step="0.1" value="0">
-            </div>
-            <div class="slider-group">
-                <label>DIY Handiness (maintenance savings %) <span id="diyVal" class="value-display">0%</span></label>
-                <input type="range" id="diy" min="0" max="100" step="5" value="0">
-            </div>
+            <div class="slider-group"><label>Lifestyle benefit % <span id="lifestyleVal" class="value-display">0%</span></label><input type="range" id="lifestyle" min="0" max="8" step="0.1" value="2"></div>
+            <div class="slider-group"><label>DIY savings % <span id="diyVal" class="value-display">0%</span></label><input type="range" id="diy" min="0" max="100" step="5" value="0"></div>
         </div>
 
         <div class="card">
-            <h3>📉 Inflation</h3>
-            <div class="slider-group">
-                <label>Expected inflation (% per year) <span id="inflationVal" class="value-display">2.5%</span></label>
-                <input type="range" id="inflation" min="0" max="6" step="0.1" value="2.5">
-            </div>
-            <div class="note">Inflation increases rent and owner costs yearly. Monthly DCA is recalculated each year.</div>
+            <h3>📉 Inflation & Returns</h3>
+            <div class="slider-group"><label>Inflation % <span id="inflationVal" class="value-display">2.5%</span></label><input type="range" id="inflation" min="0" max="6" step="0.1" value="2.5"></div>
+            <div class="slider-group"><label>SPY Return % <span id="spyReturnVal" class="value-display">9.0%</span></label><input type="range" id="spyReturn" min="0" max="15" step="0.5" value="9"></div>
         </div>
     </div>
 
-    <!-- RIGHT COLUMN: RESULTS -->
+    <!-- RIGHT COLUMN -->
     <div class="results-panel">
         <div class="card results-card">
             <h3>📊 Comparison at Year <span id="compareYearLabel">7</span></h3>
+            
             <div class="comparison-table">
                 <div class="comparison-col">
                     <h4>🏃 Renter (Invest in SPY)</h4>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Down payment invested <span class="info-icon" data-tooltip="The down payment amount that a renter keeps and invests as a lump sum">ℹ️</span></span>
-                        <span class="comparison-number" id="renterLumpSum">$86,000</span>
-                    </div>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Total DCA contributions <span class="info-icon" data-tooltip="Total money invested over time: lump sum + all monthly savings from renting">ℹ️</span></span>
-                        <span class="comparison-number" id="renterTotalContributions">$0</span>
-                    </div>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Nominal portfolio value <span class="info-icon" data-tooltip="Future value of all investments before adjusting for inflation">ℹ️</span></span>
-                        <span class="comparison-number" id="renterPortfolioNominal">$0</span>
-                    </div>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Real portfolio value <span class="info-icon" data-tooltip="Portfolio value in today's purchasing power (inflation‑adjusted)">ℹ️</span></span>
-                        <span class="comparison-number" id="renterPortfolioReal">$0</span>
-                    </div>
+                    <div class="comparison-row"><span class="comparison-label">Initial investment</span><span class="comparison-number" id="renterLumpSum">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Total contributions</span><span class="comparison-number" id="renterTotalContributions">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Nominal portfolio</span><span class="comparison-number" id="renterPortfolioNominal">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Real portfolio</span><span class="comparison-number" id="renterPortfolioReal">$0</span></div>
                 </div>
                 <div class="comparison-col">
                     <h4>🏡 Owner</h4>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Nominal home value <span class="info-icon" data-tooltip="Home price after applying appreciation">ℹ️</span></span>
-                        <span class="comparison-number" id="ownerHomeValueNom">$0</span>
-                    </div>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Remaining mortgage <span class="info-icon" data-tooltip="Loan balance left after years of payments">ℹ️</span></span>
-                        <span class="comparison-number" id="ownerRemainingMortgage">$0</span>
-                    </div>
-                    <div class="comparison-row">
-                        <span class="comparison-label" id="netEquityLabel">Net equity (after selling costs) <span class="info-icon" data-tooltip="Home value minus remaining mortgage minus selling commission (if you sell)">ℹ️</span></span>
-                        <span class="comparison-number" id="ownerNetEquityNom">$0</span>
-                    </div>
-                    <div class="comparison-row">
-                        <span class="comparison-label">Real net equity <span class="info-icon" data-tooltip="Net equity in today's dollars (inflation‑adjusted)">ℹ️</span></span>
-                        <span class="comparison-number" id="ownerNetEquityReal">$0</span>
-                    </div>
+                    <div class="comparison-row"><span class="comparison-label">Home value</span><span class="comparison-number" id="ownerHomeValueNom">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Remaining mortgage</span><span class="comparison-number" id="ownerRemainingMortgage">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label" id="netEquityLabel">Net equity (after selling)</span><span class="comparison-number" id="ownerNetEquityNom">$0</span></div>
+                    <div class="comparison-row"><span class="comparison-label">Real net equity</span><span class="comparison-number" id="ownerNetEquityReal">$0</span></div>
                 </div>
             </div>
-            <div class="checkbox-group">
+
+            <div style="margin: 10px 0;">
                 <input type="checkbox" id="includeSellingCostCheckbox" checked>
-                <label for="includeSellingCostCheckbox">Include selling commission in owner's net equity</label>
+                <label for="includeSellingCostCheckbox">Include selling commission</label>
             </div>
-            <div class="verdict" id="comparisonVerdict">⚖️ Renter's portfolio is higher at this point</div>
 
-            <hr>
+            <div class="verdict" id="comparisonVerdict">Calculating...</div>
+
+            <div class="chart-container">
+                <canvas id="equityChart"></canvas>
+            </div>
+
             <div class="break-even-box">
-                <div class="result-label">⏱️ Break‑even (nominal) – when owner pulls ahead</div>
-                <div class="break-even-value" id="breakEvenExact">7 years 2 months</div>
-                <div class="note">Calculated using the same inflation‑adjusted simulation as the comparison above. Owner's net equity (after selling costs) and renter's portfolio are compared year by year.</div>
+                <div style="color:#8aaec0; font-size:0.8rem;">⏱️ Break-even (nominal)</div>
+                <div class="break-even-value" id="breakEvenExact">—</div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; margin: 0.8rem 0 0.5rem;">
-                <h3 style="font-size:1rem;">📈 Adjust comparison year</h3>
-                <button id="syncBreakEvenBtn" class="inline-button">↻ Set to break‑even year</button>
+            <div style="display: flex; justify-content: space-between; margin: 0.8rem 0;">
+                <h3 style="font-size:1rem;">Adjust comparison year</h3>
+                <button id="syncBreakEvenBtn" class="inline-button">↻ Set to break-even</button>
             </div>
             <div class="slider-group">
                 <label>Years to compare <span id="compareYearsVal" class="value-display">7</span></label>
                 <input type="range" id="compareYears" min="1" max="30" step="1" value="7">
             </div>
-            <div class="slider-group">
-                <label>Expected nominal return (SPY) % <span id="spyReturnVal" class="value-display">9.0%</span></label>
-                <input type="range" id="spyReturn" min="0" max="15" step="0.5" value="9">
-            </div>
-            <div class="note">Monthly DCA varies each year because rent and owner costs increase with inflation. The renter invests the monthly difference (if positive) every month.</div>
         </div>
     </div>
-    <footer>moatmain.com — Mental models for life. Break‑even is computed with same detailed simulation as the comparison table.</footer>
 </div>
 
+<footer>moatmain.com — Fixed monthly simulation + chart</footer>
+
 <script>
-    // City preset data
-    const cityData = {
-        national: { price: 430000, rent: 2300, tax: 1.10, insurance: 1700, maint: 1.5 },
-        nyc: { price: 750000, rent: 4200, tax: 1.75, insurance: 1800, maint: 1.5 },
-        la: { price: 880000, rent: 3800, tax: 1.20, insurance: 2000, maint: 1.5 },
-        chi: { price: 350000, rent: 2000, tax: 2.10, insurance: 1500, maint: 1.6 },
-        hou: { price: 310000, rent: 1800, tax: 2.20, insurance: 1800, maint: 1.5 },
-        phx: { price: 440000, rent: 1900, tax: 0.80, insurance: 1600, maint: 1.4 },
-        phi: { price: 320000, rent: 1700, tax: 1.40, insurance: 1400, maint: 1.5 },
-        atl: { price: 380000, rent: 1900, tax: 1.05, insurance: 1500, maint: 1.5 },
-        den: { price: 570000, rent: 2300, tax: 0.65, insurance: 1700, maint: 1.5 },
-        sea: { price: 720000, rent: 2900, tax: 0.95, insurance: 1600, maint: 1.5 }
+// City presets
+const cityData = {
+    national: { price: 430000, rent: 2300, tax: 1.10, insurance: 1700, maint: 1.5 },
+    nyc: { price: 750000, rent: 4200, tax: 1.75, insurance: 1800, maint: 1.5 },
+    la: { price: 880000, rent: 3800, tax: 1.20, insurance: 2000, maint: 1.5 },
+    chi: { price: 350000, rent: 2000, tax: 2.10, insurance: 1500, maint: 1.6 },
+    hou: { price: 310000, rent: 1800, tax: 2.20, insurance: 1800, maint: 1.5 },
+    phx: { price: 440000, rent: 1900, tax: 0.80, insurance: 1600, maint: 1.4 },
+    phi: { price: 320000, rent: 1700, tax: 1.40, insurance: 1400, maint: 1.5 },
+    atl: { price: 380000, rent: 1900, tax: 1.05, insurance: 1500, maint: 1.5 },
+    den: { price: 570000, rent: 2300, tax: 0.65, insurance: 1700, maint: 1.5 },
+    sea: { price: 720000, rent: 2900, tax: 0.95, insurance: 1600, maint: 1.5 }
+};
+
+let chartInstance = null;
+let currentBreakEven = 0;
+
+function getLoanTermMonths() {
+    const checked = document.querySelector('input[name="loanTerm"]:checked');
+    return (checked ? parseInt(checked.value) : 30) * 12;
+}
+
+function formatYearsMonths(yearsDecimal) {
+    if (yearsDecimal >= 50) return ">50 years";
+    const totalMonths = Math.round(yearsDecimal * 12);
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+    if (years === 0) return `${months} mo`;
+    return `${years} yr ${months} mo`;
+}
+
+// Run monthly simulation
+function runFullSimulation(params, maxYears = 30) {
+    const monthlyMortRate = params.rateYear / 12;
+    let monthlyPayment = 0;
+    if (monthlyMortRate > 0) {
+        monthlyPayment = params.loanAmount * (monthlyMortRate * Math.pow(1 + monthlyMortRate, params.loanTermMonths)) / 
+                        (Math.pow(1 + monthlyMortRate, params.loanTermMonths) - 1);
+    } else {
+        monthlyPayment = params.loanAmount / params.loanTermMonths;
+    }
+
+    // FIX: track total contributions properly
+    const initialLumpSum = params.downAmount + (params.P * params.closingPct);
+    let portfolio = initialLumpSum;
+    let totalContributions = initialLumpSum;
+    
+    let remainingBalance = params.loanAmount;
+    let currentRent = params.rentMonthly0;
+    let currentHomePrice = params.P;
+    let currentInsurance = params.insuranceYear0;
+
+    const snapshots = [{
+        year: 0,
+        renterPortfolio: Math.round(portfolio),
+        totalContributions: Math.round(totalContributions),
+        ownerNetEquity: Math.round(params.P - params.loanAmount - (params.includeSelling ? params.P * params.sellPct : 0)),
+        homeValue: params.P,
+        remainingMortgage: params.loanAmount
+    }];
+
+    const monthlySpyRate = params.spyReturnNom / 12;
+
+    for (let month = 1; month <= maxYears * 12; month++) {
+        const monthlyTax = currentHomePrice * params.taxRateYear / 12;
+        const monthlyIns = currentInsurance / 12;
+        const monthlyMaint = currentHomePrice * params.maintPctYear / 12 * (1 - params.diyPct);
+        const lifestyleBenefit = currentHomePrice * params.lifestylePct / 12;
+        const mortgagePayment = remainingBalance > 0 ? monthlyPayment : 0;
+
+        const ownerMonthlyCost = mortgagePayment + monthlyTax + monthlyIns + monthlyMaint - lifestyleBenefit;
+        const monthlySavings = Math.max(0, ownerMonthlyCost - currentRent);
+
+        // Renter invests monthly surplus
+        if (monthlySavings > 0) {
+            portfolio = portfolio * (1 + monthlySpyRate) + monthlySavings;
+            totalContributions += monthlySavings;  // FIX: track contributions
+        } else {
+            portfolio = portfolio * (1 + monthlySpyRate);
+        }
+
+        // Amortize mortgage
+        if (remainingBalance > 0) {
+            const interest = remainingBalance * monthlyMortRate;
+            let principal = monthlyPayment - interest;
+            if (principal > remainingBalance) principal = remainingBalance;
+            remainingBalance -= principal;
+            if (remainingBalance < 0) remainingBalance = 0;
+        }
+
+        // End of year snapshot
+        if (month % 12 === 0) {
+            const year = month / 12;
+            currentRent *= (1 + params.inflation);
+            currentHomePrice *= (1 + params.appreciationNom);
+            currentInsurance *= (1 + params.inflation);
+
+            const homeValue = params.P * Math.pow(1 + params.appreciationNom, year);
+            const sellingCost = params.includeSelling ? homeValue * params.sellPct : 0;
+            const ownerNetEquity = homeValue - remainingBalance - sellingCost;
+
+            snapshots.push({
+                year: year,
+                renterPortfolio: Math.round(portfolio),
+                totalContributions: Math.round(totalContributions),
+                ownerNetEquity: Math.round(ownerNetEquity),
+                homeValue: Math.round(homeValue),
+                remainingMortgage: Math.round(remainingBalance)
+            });
+        }
+    }
+    return snapshots;
+}
+
+function findBreakEven(snapshots) {
+    for (let i = 1; i < snapshots.length; i++) {
+        if (snapshots[i].ownerNetEquity >= snapshots[i].renterPortfolio && 
+            snapshots[i-1].ownerNetEquity < snapshots[i-1].renterPortfolio) {
+            const prev = snapshots[i-1];
+            const curr = snapshots[i];
+            const diffPrev = prev.renterPortfolio - prev.ownerNetEquity;
+            const diffCurr = curr.renterPortfolio - curr.ownerNetEquity;
+            const fraction = diffPrev / (diffPrev - diffCurr);
+            return prev.year + fraction;
+        }
+    }
+    return 50;
+}
+
+function updateUI() {
+    const P = parseFloat(document.getElementById('homePrice').value);
+    const rentMonthly0 = parseFloat(document.getElementById('rent').value);
+    const downPct = parseFloat(document.getElementById('downPercent').value) / 100;
+    const rateYear = parseFloat(document.getElementById('rate').value) / 100;
+    const taxRateYear = parseFloat(document.getElementById('taxRate').value) / 100;
+    const insuranceYear0 = parseFloat(document.getElementById('insurance').value);
+    const maintPctYear = parseFloat(document.getElementById('maintPercent').value) / 100;
+    const closingPct = parseFloat(document.getElementById('closingPercent').value) / 100;
+    const sellPct = parseFloat(document.getElementById('sellPercent').value) / 100;
+    const appreciationNom = parseFloat(document.getElementById('appreciation').value) / 100;
+    const lifestylePct = parseFloat(document.getElementById('lifestyle').value) / 100;
+    const diyPct = parseFloat(document.getElementById('diy').value) / 100;
+    const inflation = parseFloat(document.getElementById('inflation').value) / 100;
+    const spyReturnNom = parseFloat(document.getElementById('spyReturn').value) / 100;
+    const includeSelling = document.getElementById('includeSellingCostCheckbox').checked;
+    const compareYears = parseInt(document.getElementById('compareYears').value);
+
+    const downAmount = P * downPct;
+    const loanAmount = P - downAmount;
+    const loanTermMonths = getLoanTermMonths();
+
+    // Update input displays
+    document.getElementById('homePriceVal').textContent = '$' + P.toLocaleString();
+    document.getElementById('rentVal').textContent = '$' + rentMonthly0.toLocaleString();
+    document.getElementById('downPercentVal').textContent = (downPct*100).toFixed(0) + '%';
+    document.getElementById('rateVal').textContent = (rateYear*100).toFixed(1) + '%';
+    document.getElementById('taxVal').textContent = (taxRateYear*100).toFixed(2) + '%';
+    document.getElementById('insVal').textContent = '$' + insuranceYear0.toLocaleString();
+    document.getElementById('maintPercentVal').textContent = (maintPctYear*100).toFixed(1) + '%';
+    document.getElementById('closingPercentVal').textContent = (closingPct*100).toFixed(1) + '%';
+    document.getElementById('sellPercentVal').textContent = (sellPct*100).toFixed(1) + '%';
+    document.getElementById('apprVal').textContent = (appreciationNom*100).toFixed(1) + '%';
+    document.getElementById('lifestyleVal').textContent = (lifestylePct*100).toFixed(1) + '%';
+    document.getElementById('diyVal').textContent = (diyPct*100).toFixed(0) + '%';
+    document.getElementById('inflationVal').textContent = (inflation*100).toFixed(1) + '%';
+    document.getElementById('spyReturnVal').textContent = (spyReturnNom*100).toFixed(1) + '%';
+    document.getElementById('compareYearsVal').textContent = compareYears;
+    document.getElementById('compareYearLabel').textContent = compareYears;
+
+    const params = {
+        P, rentMonthly0, downAmount, loanAmount, rateYear, taxRateYear, insuranceYear0,
+        maintPctYear, appreciationNom, lifestylePct, diyPct, inflation, sellPct,
+        loanTermMonths, spyReturnNom, includeSelling, closingPct
     };
 
-    // DOM elements
-    const homePriceSlider = document.getElementById('homePrice');
-    const rentSlider = document.getElementById('rent');
-    const downPercentSlider = document.getElementById('downPercent');
-    const rateSlider = document.getElementById('rate');
-    const taxRateSlider = document.getElementById('taxRate');
-    const insuranceSlider = document.getElementById('insurance');
-    const maintPercentSlider = document.getElementById('maintPercent');
-    const closingPercentSlider = document.getElementById('closingPercent');
-    const sellPercentSlider = document.getElementById('sellPercent');
-    const appreciationSlider = document.getElementById('appreciation');
-    const lifestyleSlider = document.getElementById('lifestyle');
-    const diySlider = document.getElementById('diy');
-    const inflationSlider = document.getElementById('inflation');
-    const citySelect = document.getElementById('citySelect');
-    const spyReturnSlider = document.getElementById('spyReturn');
-    const compareYearsSlider = document.getElementById('compareYears');
-    const syncBtn = document.getElementById('syncBreakEvenBtn');
-    const loanTermRadios = document.querySelectorAll('input[name="loanTerm"]');
-    const includeSellingCheckbox = document.getElementById('includeSellingCostCheckbox');
+    const snapshots = runFullSimulation(params, 30);
+    const result = snapshots[compareYears] || snapshots[snapshots.length-1];
+
+    // Update comparison table
+    document.getElementById('renterLumpSum').textContent = '$' + Math.round(downAmount + P * closingPct).toLocaleString();
+    document.getElementById('renterTotalContributions').textContent = '$' + result.totalContributions.toLocaleString();
+    document.getElementById('renterPortfolioNominal').textContent = '$' + result.renterPortfolio.toLocaleString();
+    document.getElementById('renterPortfolioReal').textContent = '$' + Math.round(result.renterPortfolio / Math.pow(1 + inflation, compareYears)).toLocaleString();
+    document.getElementById('ownerHomeValueNom').textContent = '$' + result.homeValue.toLocaleString();
+    document.getElementById('ownerRemainingMortgage').textContent = '$' + result.remainingMortgage.toLocaleString();
+    document.getElementById('ownerNetEquityNom').textContent = '$' + result.ownerNetEquity.toLocaleString();
+    document.getElementById('ownerNetEquityReal').textContent = '$' + Math.round(result.ownerNetEquity / Math.pow(1 + inflation, compareYears)).toLocaleString();
+
+    // Update net equity label based on checkbox
     const netEquityLabel = document.getElementById('netEquityLabel');
-
-    function getLoanTermMonths() {
-        for (let radio of loanTermRadios) if (radio.checked) return parseInt(radio.value) * 12;
-        return 180;
+    if (includeSelling) {
+        netEquityLabel.textContent = 'Net equity (after selling)';
+    } else {
+        netEquityLabel.textContent = 'Net equity (before selling)';
     }
 
-    function setCityPreset() {
-        const city = citySelect.value;
-        if (city === 'custom') return;
-        const data = cityData[city];
-        if (data) {
-            homePriceSlider.value = data.price;
-            rentSlider.value = data.rent;
-            taxRateSlider.value = data.tax;
-            insuranceSlider.value = data.insurance;
-            maintPercentSlider.value = data.maint;
-            updateUI();
+    // Verdict
+    const verdictDiv = document.getElementById('comparisonVerdict');
+    if (result.ownerNetEquity > result.renterPortfolio) {
+        verdictDiv.innerHTML = `🏡 Owner ahead by $${(result.ownerNetEquity - result.renterPortfolio).toLocaleString()}`;
+    } else {
+        verdictDiv.innerHTML = `📈 Renter ahead by $${(result.renterPortfolio - result.ownerNetEquity).toLocaleString()}`;
+    }
+
+    // Break-even
+    currentBreakEven = findBreakEven(snapshots);
+    document.getElementById('breakEvenExact').textContent = formatYearsMonths(currentBreakEven);
+
+    // Chart
+    updateChart(snapshots);
+}
+
+function updateChart(snapshots) {
+    const ctx = document.getElementById('equityChart');
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: snapshots.map(s => 'Y' + s.year),
+            datasets: [
+                { 
+                    label: 'Renter Portfolio', 
+                    data: snapshots.map(s => s.renterPortfolio), 
+                    borderColor: '#4ade80', 
+                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                    fill: true,
+                    tension: 0.3, 
+                    borderWidth: 3,
+                    pointRadius: 0
+                },
+                { 
+                    label: 'Owner Net Equity', 
+                    data: snapshots.map(s => s.ownerNetEquity), 
+                    borderColor: '#fb923c', 
+                    backgroundColor: 'rgba(251, 146, 60, 0.1)',
+                    fill: true,
+                    tension: 0.3, 
+                    borderWidth: 3,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { 
+                legend: { position: 'top', labels: { color: '#e0f2fe', font: { size: 11 } } },
+                tooltip: {
+                    backgroundColor: '#0f212e',
+                    titleColor: '#f5e7a3',
+                    bodyColor: '#e0f2fe',
+                    borderColor: '#d4af37',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: { 
+                    ticks: { color: '#94a3b8', callback: v => '$' + (v/1000).toFixed(0)+'k' }, 
+                    grid: { color: '#334155' } 
+                },
+                x: { 
+                    ticks: { color: '#94a3b8', maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, 
+                    grid: { color: '#334155' } 
+                }
+            }
         }
-    }
-    citySelect.addEventListener('change', setCityPreset);
-    loanTermRadios.forEach(radio => radio.addEventListener('change', updateUI));
-    includeSellingCheckbox.addEventListener('change', updateUI);
+    });
+}
 
-    function formatYearsMonths(yearsDecimal) {
-        if (yearsDecimal >= 50) return ">50 years";
-        const totalMonths = Math.round(yearsDecimal * 12);
-        const years = Math.floor(totalMonths / 12);
-        const months = totalMonths % 12;
-        if (years === 0) return `${months} month${months !== 1 ? 's' : ''}`;
-        return `${years} year${years !== 1 ? 's' : ''} ${months} month${months !== 1 ? 's' : ''}`;
-    }
+// Event Listeners
+document.querySelectorAll('input[type="range"], select, input[type="radio"]').forEach(el => {
+    el.addEventListener('input', updateUI);
+    el.addEventListener('change', updateUI);
+});
+document.getElementById('includeSellingCostCheckbox').addEventListener('change', updateUI);
+document.getElementById('syncBreakEvenBtn').addEventListener('click', () => {
+    let target = Math.ceil(currentBreakEven);
+    if (target > 30) target = 30;
+    if (target < 1) target = 1;
+    document.getElementById('compareYears').value = target;
+    updateUI();
+});
 
-    function syncCompareYearsToBreakEven() {
-        // Use the break-even year computed in updateUI (stored in currentBreakEvenDecimal)
-        let years = currentBreakEvenDecimal;
-        if (years >= 50) years = 30;
-        else if (years < 1) years = 1;
-        let roundedUp = Math.ceil(years);
-        if (roundedUp > 30) roundedUp = 30;
-        compareYearsSlider.value = roundedUp;
+document.getElementById('citySelect').addEventListener('change', () => {
+    const city = document.getElementById('citySelect').value;
+    if (city === 'custom') return;
+    const data = cityData[city];
+    if (data) {
+        document.getElementById('homePrice').value = data.price;
+        document.getElementById('rent').value = data.rent;
+        document.getElementById('taxRate').value = data.tax;
+        document.getElementById('insurance').value = data.insurance;
+        document.getElementById('maintPercent').value = data.maint;
         updateUI();
     }
+});
 
-    // Global variable to store break-even year from simulation
-    let currentBreakEvenDecimal = 0;
-
-    // Function to simulate a single year and return {renterPortfolio, ownerNetEquity, remainingBalance}
-    function simulateYear(startYear, params, yearsToSim) {
-        // params: { P, downAmount, loanAmount, rateYear, taxRateYear, insuranceYear0, maintPctYear, 
-        //           appreciationNom, lifestylePct, diyPct, inflation, sellPct, loanTermMonths, spyReturnNom }
-        // We'll run simulation from year 0 to yearsToSim and return final values.
-        let portfolioNominal = params.downAmount;
-        let totalContributions = params.downAmount;
-        let currentRent = params.rentMonthly0;
-        let currentHomePrice = params.P;
-        let remainingBalance = params.loanAmount;
-        let currentInsurance = params.insuranceYear0;
-        let monthlyRateSpy = params.spyReturnNom / 12;
-        let rateYear = params.rateYear;
-        let taxRateYear = params.taxRateYear;
-        let maintPctYear = params.maintPctYear;
-        let lifestylePct = params.lifestylePct;
-        let diyPct = params.diyPct;
-        let inflation = params.inflation;
-        let appreciationNom = params.appreciationNom;
-        let sellPct = params.sellPct;
-        let loanTermMonths = params.loanTermMonths;
-        let includeSelling = params.includeSelling;
-
-        for (let year = 0; year < yearsToSim; year++) {
-            let monthlyInterest = remainingBalance * (rateYear / 12);
-            let monthlyTax = currentHomePrice * taxRateYear / 12;
-            let monthlyInsurance = currentInsurance / 12;
-            let rawMaint = currentHomePrice * maintPctYear / 12;
-            let maintDIY = rawMaint * (1 - diyPct);
-            let monthlyUnrec = monthlyInterest + monthlyTax + monthlyInsurance + maintDIY;
-            let lifestyleBenefit = currentHomePrice * lifestylePct / 12;
-            let effectiveOwnCost = monthlyUnrec - lifestyleBenefit;
-            let monthlySavings = Math.max(0, effectiveOwnCost - currentRent);
-
-            if (monthlySavings > 0) {
-                let fvYearly = 0;
-                if (monthlyRateSpy > 0) {
-                    fvYearly = monthlySavings * (Math.pow(1 + monthlyRateSpy, 12) - 1) / monthlyRateSpy;
-                } else {
-                    fvYearly = monthlySavings * 12;
-                }
-                portfolioNominal = portfolioNominal * Math.pow(1 + monthlyRateSpy, 12) + fvYearly;
-                totalContributions += monthlySavings * 12;
-            } else {
-                portfolioNominal = portfolioNominal * Math.pow(1 + monthlyRateSpy, 12);
-            }
-
-            currentRent = currentRent * (1 + inflation);
-            currentHomePrice = currentHomePrice * (1 + appreciationNom);
-            currentInsurance = currentInsurance * (1 + inflation);
-
-            let monthlyPayment = 0;
-            let monthlyRateMort = rateYear / 12;
-            if (monthlyRateMort > 0) {
-                monthlyPayment = params.loanAmount * (monthlyRateMort * Math.pow(1 + monthlyRateMort, loanTermMonths)) / (Math.pow(1 + monthlyRateMort, loanTermMonths) - 1);
-            } else {
-                monthlyPayment = params.loanAmount / loanTermMonths;
-            }
-            for (let m = 0; m < 12; m++) {
-                if (remainingBalance <= 0) break;
-                let interestPaid = remainingBalance * monthlyRateMort;
-                let principalPaid = monthlyPayment - interestPaid;
-                if (principalPaid > remainingBalance) principalPaid = remainingBalance;
-                remainingBalance -= principalPaid;
-                if (remainingBalance < 0) remainingBalance = 0;
-            }
-        }
-        let homeValueNom = params.P * Math.pow(1 + appreciationNom, yearsToSim);
-        let netEquityBeforeSell = homeValueNom - remainingBalance;
-        let sellingCostAmount = includeSelling ? (homeValueNom * sellPct) : 0;
-        let ownerNetEquity = netEquityBeforeSell - sellingCostAmount;
-        return { renterPortfolio: portfolioNominal, ownerNetEquity, remainingBalance, homeValueNom, totalContributions };
-    }
-
-    function updateUI() {
-        // Gather parameters
-        let P = parseFloat(homePriceSlider.value);
-        let rentMonthly0 = parseFloat(rentSlider.value);
-        let downPct = parseFloat(downPercentSlider.value) / 100;
-        let rateYear = parseFloat(rateSlider.value) / 100;
-        let taxRateYear = parseFloat(taxRateSlider.value) / 100;
-        let insuranceYear0 = parseFloat(insuranceSlider.value);
-        let maintPctYear = parseFloat(maintPercentSlider.value) / 100;
-        let closingPct = parseFloat(closingPercentSlider.value) / 100;
-        let sellPct = parseFloat(sellPercentSlider.value) / 100;
-        let appreciationNom = parseFloat(appreciationSlider.value) / 100;
-        let lifestylePct = parseFloat(lifestyleSlider.value) / 100;
-        let diyPct = parseFloat(diySlider.value) / 100;
-        let inflation = parseFloat(inflationSlider.value) / 100;
-        let loanTermMonths = getLoanTermMonths();
-        let spyReturnNom = parseFloat(spyReturnSlider.value) / 100;
-        let includeSelling = includeSellingCheckbox.checked;
-        let downAmount = P * downPct;
-        let loanAmount = P - downAmount;
-
-        // Update input displays
-        document.getElementById('homePriceVal').innerText = '$' + P.toLocaleString();
-        document.getElementById('rentVal').innerText = '$' + rentMonthly0.toLocaleString();
-        document.getElementById('downPercentVal').innerText = (downPct*100).toFixed(0) + '%';
-        document.getElementById('rateVal').innerText = (rateYear*100).toFixed(1) + '%';
-        document.getElementById('taxVal').innerText = (taxRateYear*100).toFixed(2) + '%';
-        document.getElementById('insVal').innerText = '$' + insuranceYear0.toLocaleString();
-        document.getElementById('maintPercentVal').innerText = (maintPctYear*100).toFixed(1) + '%';
-        document.getElementById('closingPercentVal').innerText = (closingPct*100).toFixed(1) + '%';
-        document.getElementById('sellPercentVal').innerText = (sellPct*100).toFixed(1) + '%';
-        document.getElementById('apprVal').innerText = (appreciationNom*100).toFixed(1) + '%';
-        document.getElementById('lifestyleVal').innerText = (lifestylePct*100).toFixed(1) + '%';
-        document.getElementById('diyVal').innerText = (diyPct*100).toFixed(0) + '%';
-        document.getElementById('inflationVal').innerText = (inflation*100).toFixed(1) + '%';
-        document.getElementById('spyReturnVal').innerText = (spyReturnNom*100).toFixed(1) + '%';
-
-        // Comparison year
-        let compareYears = parseFloat(compareYearsSlider.value);
-        document.getElementById('compareYearsVal').innerText = compareYears;
-        document.getElementById('compareYearLabel').innerText = compareYears;
-
-        // Build params object for simulation
-        const params = {
-            P, rentMonthly0, downAmount, loanAmount, rateYear, taxRateYear, insuranceYear0,
-            maintPctYear, appreciationNom, lifestylePct, diyPct, inflation, sellPct,
-            loanTermMonths, spyReturnNom, includeSelling
-        };
-
-        // Simulate for compareYears
-        let result = simulateYear(0, params, compareYears);
-        let renterPortfolio = result.renterPortfolio;
-        let ownerNetEquity = result.ownerNetEquity;
-        let remainingBalance = result.remainingBalance;
-        let homeValueNom = result.homeValueNom;
-        let totalContributions = result.totalContributions;
-
-        // Real values
-        let renterPortfolioReal = renterPortfolio / Math.pow(1 + inflation, compareYears);
-        let ownerNetEquityReal = ownerNetEquity / Math.pow(1 + inflation, compareYears);
-
-        // Update comparison table
-        document.getElementById('renterLumpSum').innerHTML = '$' + Math.round(downAmount).toLocaleString();
-        document.getElementById('renterTotalContributions').innerHTML = '$' + Math.round(totalContributions).toLocaleString();
-        document.getElementById('renterPortfolioNominal').innerHTML = '$' + Math.round(renterPortfolio).toLocaleString();
-        document.getElementById('renterPortfolioReal').innerHTML = '$' + Math.round(renterPortfolioReal).toLocaleString();
-        document.getElementById('ownerHomeValueNom').innerHTML = '$' + Math.round(homeValueNom).toLocaleString();
-        document.getElementById('ownerRemainingMortgage').innerHTML = '$' + Math.round(remainingBalance).toLocaleString();
-        document.getElementById('ownerNetEquityNom').innerHTML = '$' + Math.round(ownerNetEquity).toLocaleString();
-        document.getElementById('ownerNetEquityReal').innerHTML = '$' + Math.round(ownerNetEquityReal).toLocaleString();
-
-        // Update label for net equity
-        if (includeSellingCheckbox.checked) {
-            netEquityLabel.innerHTML = 'Net equity (after selling costs) <span class="info-icon" data-tooltip="Home value minus remaining mortgage minus selling commission (if you sell)">ℹ️</span>';
-        } else {
-            netEquityLabel.innerHTML = 'Net equity (before selling costs) <span class="info-icon" data-tooltip="Home value minus remaining mortgage, before deducting any selling commission">ℹ️</span>';
-        }
-
-        // Verdict at compareYears
-        let verdictDiv = document.getElementById('comparisonVerdict');
-        if (ownerNetEquity > renterPortfolio) {
-            verdictDiv.innerHTML = '🏡 Owner is ahead (nominal) by $' + Math.round(ownerNetEquity - renterPortfolio).toLocaleString();
-        } else {
-            verdictDiv.innerHTML = '📈 Renter is ahead (nominal) by $' + Math.round(renterPortfolio - ownerNetEquity).toLocaleString();
-        }
-
-        // Compute break-even year using same simulation (search year by year)
-        let breakEvenYear = 999;
-        for (let y = 1; y <= 50; y++) {
-            let resY = simulateYear(0, params, y);
-            if (resY.ownerNetEquity >= resY.renterPortfolio) {
-                breakEvenYear = y;
-                break;
-            }
-        }
-        if (breakEvenYear === 999) breakEvenYear = 50;
-        currentBreakEvenDecimal = breakEvenYear;
-        document.getElementById('breakEvenExact').innerHTML = formatYearsMonths(breakEvenYear);
-    }
-
-    // Bind all sliders
-    const sliders = ['homePrice', 'rent', 'downPercent', 'rate', 'taxRate', 'insurance', 'maintPercent', 'closingPercent', 'sellPercent', 'appreciation', 'lifestyle', 'diy', 'inflation', 'spyReturn', 'compareYears'];
-    sliders.forEach(id => document.getElementById(id).addEventListener('input', updateUI));
-    syncBtn.addEventListener('click', syncCompareYearsToBreakEven);
-
-    updateUI();
+// Initial run
+updateUI();
 </script>
 </body>
 </html>
